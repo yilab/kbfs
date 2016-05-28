@@ -89,8 +89,10 @@ func makeFakeTlfHandle(
 	uid := keybase1.MakeTestUID(x)
 	return &TlfHandle{
 		public: public,
-		resolvedWriters: map[keybase1.UID]libkb.NormalizedUsername{
-			uid: "test_user",
+		resolvedWriters: map[string]resolutionInfo{
+			"test_user": resolutionInfo{
+				"test_user", "test_user", uid,
+			},
 		},
 		unresolvedWriters: unresolvedWriters,
 		unresolvedReaders: unresolvedReaders,

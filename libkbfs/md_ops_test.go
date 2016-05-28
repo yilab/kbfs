@@ -75,7 +75,15 @@ func verifyMDForPublic(config *ConfigMock, rmds *RootMetadataSigned,
 	if hasVerifyingKeyErr == nil {
 		config.mockCodec.EXPECT().Encode(rmds.MD.WriterMetadata).Return(packedData, nil)
 		config.mockCrypto.EXPECT().Verify(packedData, rmds.MD.WriterMetadataSigInfo).Return(nil)
-		config.mockCodec.EXPECT().Encode(rmds.MD).AnyTimes().Return(packedData, nil)
+		md := rmds.MD
+		h := md.tlfHandle
+		bh := h.ToBareHandleOrBust()
+		h2, err := MakeTlfHandle(context.Background(), bh, config.KBPKI())
+		if err != nil {
+			panic(err)
+		}
+		md.tlfHandle = h2
+		config.mockCodec.EXPECT().Encode(md).AnyTimes().Return(packedData, nil)
 		config.mockCrypto.EXPECT().Verify(packedData, rmds.SigInfo).Return(verifyErr)
 		if verifyErr == nil {
 			config.mockCodec.EXPECT().Decode(
@@ -93,7 +101,15 @@ func verifyMDForPrivate(config *ConfigMock, rmds *RootMetadataSigned) {
 		gomock.Any(), TLFCryptKey{}).Return(&rmds.MD.data, nil)
 
 	packedData := []byte{4, 3, 2, 1}
-	config.mockCodec.EXPECT().Encode(rmds.MD).Return(packedData, nil)
+	md := rmds.MD
+	h := md.tlfHandle
+	bh := h.ToBareHandleOrBust()
+	h2, err := MakeTlfHandle(context.Background(), bh, config.KBPKI())
+	if err != nil {
+		panic(err)
+	}
+	md.tlfHandle = h2
+	config.mockCodec.EXPECT().Encode(md).Return(packedData, nil)
 	config.mockCodec.EXPECT().Encode(rmds.MD.WriterMetadata).Return(packedData, nil)
 	config.mockKbpki.EXPECT().HasVerifyingKey(gomock.Any(), gomock.Any(),
 		gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
