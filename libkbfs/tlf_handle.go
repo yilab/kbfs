@@ -122,6 +122,17 @@ func (h TlfHandle) ResolvedReaders() []keybase1.UID {
 	return readers
 }
 
+func (h TlfHandle) GetNeededIdentifies() []resolutionInfo {
+	var resInfos []resolutionInfo
+	for _, w := range h.resolvedWriters {
+		resInfos = append(resInfos, w)
+	}
+	for _, r := range h.resolvedReaders {
+		resInfos = append(resInfos, r)
+	}
+	return resInfos
+}
+
 // UnresolvedWriters returns the handle's unresolved writers in sorted
 // order.
 func (h TlfHandle) UnresolvedWriters() []keybase1.SocialAssertion {

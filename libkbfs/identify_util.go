@@ -60,8 +60,48 @@ func identifyUserList(ctx context.Context, nug normalizedUsernameGetter, identif
 	return nil
 }
 
+func identifyResolutionInfo(ctx context.Context, identifier identifier, resInfo resolutionInfo, isPublic bool) error {
+	var pubOrPri string
+	if isPublic {
+		pubOrPri = "public"
+	} else {
+		pubOrPri = "private"
+	}
+	reason := fmt.Sprintf("You accessed a %s folder with %s.", pubOrPri, resInfo.assertion)
+	userInfo, err := identifier.Identify(ctx, resInfo.assertion, reason)
+	if err != nil {
+		return err
+	}
+	if userInfo.Name != resInfo.name {
+		return fmt.Errorf("Identify returned name=%s, expected %s", userInfo.Name, resInfo.name)
+	}
+	if userInfo.UID != resInfo.uid {
+		return fmt.Errorf("Identify returned uid=%s, expected %s", userInfo.UID, resInfo.uid)
+	}
+	return nil
+}
+
 // identifyHandle identifies the canonical names in the given handle.
 func identifyHandle(ctx context.Context, nug normalizedUsernameGetter, identifier identifier, h *TlfHandle) error {
-	uids := append(h.ResolvedWriters(), h.ResolvedReaders()...)
-	return identifyUserList(ctx, nug, identifier, uids, h.IsPublic())
+	neededIdentifies := h.GetNeededIdentifies()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	errChan := make(chan error, len(neededIdentifies))
+	// TODO: limit the number of concurrent identifies?
+	for _, resInfo := range neededIdentifies {
+		go func(resInfo resolutionInfo) {
+			err := identifyResolutionInfo(ctx, identifier, resInfo, h.IsPublic())
+			errChan <- err
+		}(resInfo)
+	}
+
+	for i := 0; i < len(neededIdentifies); i++ {
+		err := <-errChan
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
