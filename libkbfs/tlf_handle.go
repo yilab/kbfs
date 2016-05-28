@@ -122,7 +122,7 @@ func (h TlfHandle) ResolvedReaders() []keybase1.UID {
 	return readers
 }
 
-func (h TlfHandle) GetNeededIdentifies() []resolutionInfo {
+func (h TlfHandle) getNeededIdentifies() []resolutionInfo {
 	var resInfos []resolutionInfo
 	for _, w := range h.resolvedWriters {
 		resInfos = append(resInfos, w)

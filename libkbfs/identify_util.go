@@ -83,7 +83,7 @@ func identifyResolutionInfo(ctx context.Context, identifier identifier, resInfo 
 
 // identifyHandle identifies the canonical names in the given handle.
 func identifyHandle(ctx context.Context, nug normalizedUsernameGetter, identifier identifier, h *TlfHandle) error {
-	neededIdentifies := h.GetNeededIdentifies()
+	neededIdentifies := h.getNeededIdentifies()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
