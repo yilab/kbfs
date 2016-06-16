@@ -343,8 +343,8 @@ func (md *MDOpsStandard) GetUnmergedForTLF(ctx context.Context, id TlfID, bid Br
 	return md.getForTLF(ctx, id, bid, Unmerged)
 }
 
-func (md *MDOpsStandard) processRange(ctx context.Context, id TlfID,
-	bid BranchID, rmds []*RootMetadataSigned) (
+func (md *MDOpsStandard) processRange(ctx context.Context, h *TlfHandle,
+	id TlfID, bid BranchID, rmds []*RootMetadataSigned) (
 	[]*RootMetadata, error) {
 	if rmds == nil {
 		return nil, nil
@@ -361,13 +361,20 @@ func (md *MDOpsStandard) processRange(ctx context.Context, id TlfID,
 			return nil, err
 		}
 
-		bareHandle, err := r.MD.MakeBareTlfHandle()
-		if err != nil {
-			return nil, err
-		}
-		handle, err := MakeTlfHandle(ctx, bareHandle, md.config.KBPKI())
-		if err != nil {
-			return nil, err
+		var handle *TlfHandle
+		if h == nil {
+			// TODO: Get rid of this!
+			bareHandle, err := r.MD.MakeBareTlfHandle()
+			if err != nil {
+				return nil, err
+			}
+			tmp, err := MakeTlfHandle(ctx, bareHandle, md.config.KBPKI())
+			if err != nil {
+				return nil, err
+			}
+			handle = tmp
+		} else {
+			handle = h
 		}
 
 		if prevMD != nil {
@@ -426,7 +433,7 @@ func (md *MDOpsStandard) getRange(ctx context.Context, id TlfID,
 	if err != nil {
 		return nil, err
 	}
-	rmd, err := md.processRange(ctx, id, bid, rmds)
+	rmd, err := md.processRange(ctx, nil, id, bid, rmds)
 	if err != nil {
 		return nil, err
 	}
