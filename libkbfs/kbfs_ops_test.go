@@ -5192,5 +5192,5 @@ func TestKBFSOpsMaliciousMDServerRange(t *testing.T) {
 	// Simulate the server triggering alice to update.
 	config1.SetKeyCache(NewKeyCacheStandard(1))
 	err = kbfsOps1.SyncFromServerForTesting(ctx, fb1)
-	require.NoError(t, err)
+	require.IsType(t, MDMismatchError{}, err)
 }
