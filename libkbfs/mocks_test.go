@@ -1969,26 +1969,26 @@ func (_mr *_MockMDOpsRecorder) GetUnmergedForTLF(arg0, arg1, arg2 interface{}) *
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetUnmergedForTLF", arg0, arg1, arg2)
 }
 
-func (_m *MockMDOps) GetRange(ctx context.Context, id TlfID, start MetadataRevision, stop MetadataRevision) ([]*RootMetadata, error) {
-	ret := _m.ctrl.Call(_m, "GetRange", ctx, id, start, stop)
+func (_m *MockMDOps) GetRange(ctx context.Context, h *TlfHandle, id TlfID, start MetadataRevision, stop MetadataRevision) ([]*RootMetadata, error) {
+	ret := _m.ctrl.Call(_m, "GetRange", ctx, h, id, start, stop)
 	ret0, _ := ret[0].([]*RootMetadata)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (_mr *_MockMDOpsRecorder) GetRange(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetRange", arg0, arg1, arg2, arg3)
+func (_mr *_MockMDOpsRecorder) GetRange(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetRange", arg0, arg1, arg2, arg3, arg4)
 }
 
-func (_m *MockMDOps) GetUnmergedRange(ctx context.Context, id TlfID, bid BranchID, start MetadataRevision, stop MetadataRevision) ([]*RootMetadata, error) {
-	ret := _m.ctrl.Call(_m, "GetUnmergedRange", ctx, id, bid, start, stop)
+func (_m *MockMDOps) GetUnmergedRange(ctx context.Context, h *TlfHandle, id TlfID, bid BranchID, start MetadataRevision, stop MetadataRevision) ([]*RootMetadata, error) {
+	ret := _m.ctrl.Call(_m, "GetUnmergedRange", ctx, h, id, bid, start, stop)
 	ret0, _ := ret[0].([]*RootMetadata)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (_mr *_MockMDOpsRecorder) GetUnmergedRange(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetUnmergedRange", arg0, arg1, arg2, arg3, arg4)
+func (_mr *_MockMDOpsRecorder) GetUnmergedRange(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetUnmergedRange", arg0, arg1, arg2, arg3, arg4, arg5)
 }
 
 func (_m *MockMDOps) Put(ctx context.Context, rmd *RootMetadata) error {

@@ -75,7 +75,7 @@ func (md *MDOpsStandard) verifyWriterKey(
 		// extra work by downloading the same MDs twice (for those
 		// that aren't yet in the cache).  That should be so rare that
 		// it's not worth optimizing.
-		prevMDs, err := getMDRange(ctx, md.config, rmds.MD.ID, rmds.MD.BID,
+		prevMDs, err := getMDRange(ctx, md.config, nil, rmds.MD.ID, rmds.MD.BID,
 			startRev, prevHead, rmds.MD.MergedStatus())
 		if err != nil {
 			return err
@@ -425,7 +425,7 @@ func (md *MDOpsStandard) processRange(ctx context.Context, h *TlfHandle,
 	return rmd, nil
 }
 
-func (md *MDOpsStandard) getRange(ctx context.Context, id TlfID,
+func (md *MDOpsStandard) getRange(ctx context.Context, h *TlfHandle, id TlfID,
 	bid BranchID, mStatus MergeStatus, start, stop MetadataRevision) (
 	[]*RootMetadata, error) {
 	rmds, err := md.config.MDServer().GetRange(ctx, id, bid, mStatus, start,
@@ -433,7 +433,7 @@ func (md *MDOpsStandard) getRange(ctx context.Context, id TlfID,
 	if err != nil {
 		return nil, err
 	}
-	rmd, err := md.processRange(ctx, nil, id, bid, rmds)
+	rmd, err := md.processRange(ctx, h, id, bid, rmds)
 	if err != nil {
 		return nil, err
 	}
@@ -441,15 +441,16 @@ func (md *MDOpsStandard) getRange(ctx context.Context, id TlfID,
 }
 
 // GetRange implements the MDOps interface for MDOpsStandard.
-func (md *MDOpsStandard) GetRange(ctx context.Context, id TlfID,
+func (md *MDOpsStandard) GetRange(ctx context.Context, h *TlfHandle, id TlfID,
 	start, stop MetadataRevision) ([]*RootMetadata, error) {
-	return md.getRange(ctx, id, NullBranchID, Merged, start, stop)
+	return md.getRange(ctx, h, id, NullBranchID, Merged, start, stop)
 }
 
 // GetUnmergedRange implements the MDOps interface for MDOpsStandard.
-func (md *MDOpsStandard) GetUnmergedRange(ctx context.Context, id TlfID,
+func (md *MDOpsStandard) GetUnmergedRange(
+	ctx context.Context, h *TlfHandle, id TlfID,
 	bid BranchID, start, stop MetadataRevision) ([]*RootMetadata, error) {
-	return md.getRange(ctx, id, bid, Unmerged, start, stop)
+	return md.getRange(ctx, h, id, bid, Unmerged, start, stop)
 }
 
 func (md *MDOpsStandard) readyMD(ctx context.Context, rmd *RootMetadata) (

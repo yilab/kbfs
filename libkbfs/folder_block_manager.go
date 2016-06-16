@@ -344,7 +344,7 @@ func (fbm *folderBlockManager) processBlocksToDelete(ctx context.Context) error 
 		// part of the folder history.  (This could happen
 		// if the Sync was canceled while the MD put was
 		// outstanding.)
-		rmds, err := getMDRange(ctx, fbm.config, fbm.id, md.BID,
+		rmds, err := getMDRange(ctx, fbm.config, nil, fbm.id, md.BID,
 			md.Revision, md.Revision, md.MergedStatus())
 		if err != nil || len(rmds) == 0 {
 			toDeleteAgain[md] = ptrs
@@ -538,7 +538,7 @@ func (fbm *folderBlockManager) getMostRecentOldEnoughAndGCRevisions(
 			startRev = MetadataRevisionInitial
 		}
 
-		rmds, err := getMDRange(ctx, fbm.config, fbm.id, NullBranchID, startRev,
+		rmds, err := getMDRange(ctx, fbm.config, nil, fbm.id, NullBranchID, startRev,
 			currHead, Merged)
 		if err != nil {
 			return MetadataRevisionUninitialized,
@@ -628,7 +628,7 @@ outer:
 			startRev = MetadataRevisionInitial
 		}
 
-		rmds, err := getMDRange(ctx, fbm.config, fbm.id, NullBranchID, startRev,
+		rmds, err := getMDRange(ctx, fbm.config, nil, fbm.id, NullBranchID, startRev,
 			currHead, Merged)
 		if err != nil {
 			return nil, MetadataRevisionUninitialized, false, err

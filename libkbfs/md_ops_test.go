@@ -488,7 +488,7 @@ func testMDOpsGetRangeSuccess(t *testing.T, fromStart bool) {
 	config.mockMdserv.EXPECT().GetRange(ctx, rmds1.MD.ID, NullBranchID, Merged, start,
 		stop).Return(allRMDSs, nil)
 
-	allRMDs, err := config.MDOps().GetRange(ctx, rmds1.MD.ID, start, stop)
+	allRMDs, err := config.MDOps().GetRange(ctx, nil, rmds1.MD.ID, start, stop)
 	if err != nil {
 		t.Errorf("Got error on GetRange: %v", err)
 	} else if len(allRMDs) != 3 {
@@ -541,7 +541,7 @@ func TestMDOpsGetRangeFailBadPrevRoot(t *testing.T) {
 	config.mockMdserv.EXPECT().GetRange(ctx, rmds1.MD.ID, NullBranchID, Merged, start,
 		stop).Return(allRMDSs, nil)
 
-	_, err := config.MDOps().GetRange(ctx, rmds1.MD.ID, start, stop)
+	_, err := config.MDOps().GetRange(ctx, nil, rmds1.MD.ID, start, stop)
 	if err == nil {
 		t.Errorf("Got no expected error on GetSince")
 	} else if _, ok := err.(MDMismatchError); !ok {
@@ -706,7 +706,7 @@ func TestMDOpsGetRangeFailFinal(t *testing.T) {
 	config.mockMdserv.EXPECT().GetRange(ctx, rmds1.MD.ID, NullBranchID, Merged, start,
 		stop).Return(allRMDSs, nil)
 
-	_, err := config.MDOps().GetRange(ctx, rmds1.MD.ID, start, stop)
+	_, err := config.MDOps().GetRange(ctx, nil, rmds1.MD.ID, start, stop)
 	if err == nil {
 		t.Errorf("Got no expected error on GetRange")
 	} else if _, ok := err.(MDMismatchError); !ok {

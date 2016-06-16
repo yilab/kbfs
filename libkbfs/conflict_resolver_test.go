@@ -82,7 +82,7 @@ func TestCRInput(t *testing.T) {
 		config.mockMdcache.EXPECT().Get(cr.fbo.id(), i, cr.fbo.bid).Return(
 			nil, NoSuchMDError{cr.fbo.id(), branchPoint, cr.fbo.bid})
 	}
-	config.mockMdops.EXPECT().GetUnmergedRange(gomock.Any(), cr.fbo.id(),
+	config.mockMdops.EXPECT().GetUnmergedRange(gomock.Any(), gomock.Any(), cr.fbo.id(),
 		cr.fbo.bid, MetadataRevisionInitial, branchPoint).Return(nil, nil)
 
 	for i := branchPoint + 1; i <= mergedHead; i++ {
@@ -99,7 +99,7 @@ func TestCRInput(t *testing.T) {
 		config.mockMdcache.EXPECT().Get(cr.fbo.id(), i, NullBranchID).Return(
 			nil, NoSuchMDError{cr.fbo.id(), i, NullBranchID})
 	}
-	config.mockMdops.EXPECT().GetRange(gomock.Any(), cr.fbo.id(), mergedHead+1,
+	config.mockMdops.EXPECT().GetRange(gomock.Any(), gomock.Any(), cr.fbo.id(), mergedHead+1,
 		gomock.Any()).Return(nil, nil)
 
 	// CR doesn't see any operations and so it does resolution early.
@@ -160,7 +160,7 @@ func TestCRInputFracturedRange(t *testing.T) {
 		config.mockMdcache.EXPECT().Get(cr.fbo.id(), i, cr.fbo.bid).Return(
 			nil, NoSuchMDError{cr.fbo.id(), branchPoint, cr.fbo.bid})
 	}
-	config.mockMdops.EXPECT().GetUnmergedRange(gomock.Any(), cr.fbo.id(),
+	config.mockMdops.EXPECT().GetUnmergedRange(gomock.Any(), gomock.Any(), cr.fbo.id(),
 		cr.fbo.bid, MetadataRevisionInitial, branchPoint).Return(nil, nil)
 
 	skipCacheRevision := MetadataRevision(10)
@@ -182,7 +182,7 @@ func TestCRInputFracturedRange(t *testing.T) {
 				nil, NoSuchMDError{cr.fbo.id(), i, NullBranchID})
 		}
 	}
-	config.mockMdops.EXPECT().GetRange(gomock.Any(), cr.fbo.id(),
+	config.mockMdops.EXPECT().GetRange(gomock.Any(), gomock.Any(), cr.fbo.id(),
 		skipCacheRevision, skipCacheRevision).Return(
 		[]*RootMetadata{{
 			WriterMetadata: WriterMetadata{
@@ -195,7 +195,7 @@ func TestCRInputFracturedRange(t *testing.T) {
 		config.mockMdcache.EXPECT().Get(cr.fbo.id(), i, NullBranchID).Return(
 			nil, NoSuchMDError{cr.fbo.id(), i, NullBranchID})
 	}
-	config.mockMdops.EXPECT().GetRange(gomock.Any(), cr.fbo.id(), mergedHead+1,
+	config.mockMdops.EXPECT().GetRange(gomock.Any(), gomock.Any(), cr.fbo.id(), mergedHead+1,
 		gomock.Any()).Return(nil, nil)
 
 	// CR doesn't see any operations and so it does resolution early.

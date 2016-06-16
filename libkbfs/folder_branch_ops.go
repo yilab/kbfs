@@ -3248,7 +3248,7 @@ func (fbo *folderBranchOps) getAndApplyMDUpdates(ctx context.Context,
 	lState *lockState, applyFunc applyMDUpdatesFunc) error {
 	// first look up all MD revisions newer than my current head
 	start := fbo.getCurrMDRevision(lState) + 1
-	rmds, err := getMergedMDUpdates(ctx, fbo.config, fbo.id(), start)
+	rmds, err := getMergedMDUpdates(ctx, fbo.config, nil, fbo.id(), start)
 	if err != nil {
 		return err
 	}
@@ -3274,7 +3274,7 @@ func (fbo *folderBranchOps) getUnmergedMDUpdates(
 		defer fbo.mdWriterLock.Unlock(lState)
 		return fbo.bid
 	}()
-	return getUnmergedMDUpdates(ctx, fbo.config, fbo.id(),
+	return getUnmergedMDUpdates(ctx, fbo.config, nil, fbo.id(),
 		bid, fbo.getCurrMDRevision(lState))
 }
 
@@ -3283,7 +3283,7 @@ func (fbo *folderBranchOps) getUnmergedMDUpdatesLocked(
 	MetadataRevision, []*RootMetadata, error) {
 	fbo.mdWriterLock.AssertLocked(lState)
 
-	return getUnmergedMDUpdates(ctx, fbo.config, fbo.id(),
+	return getUnmergedMDUpdates(ctx, fbo.config, nil, fbo.id(),
 		fbo.bid, fbo.getCurrMDRevision(lState))
 }
 
@@ -3311,7 +3311,7 @@ func (fbo *folderBranchOps) undoUnmergedMDUpdatesLocked(
 	// the updates.
 	fbo.setStagedLocked(lState, false, NullBranchID)
 
-	rmds, err := getMDRange(ctx, fbo.config, fbo.id(), NullBranchID,
+	rmds, err := getMDRange(ctx, fbo.config, nil, fbo.id(), NullBranchID,
 		currHead, currHead, Merged)
 	if err != nil {
 		return nil, err
@@ -3969,7 +3969,7 @@ func (fbo *folderBranchOps) GetUpdateHistory(ctx context.Context,
 
 	lState := makeFBOLockState()
 
-	rmds, err := getMergedMDUpdates(ctx, fbo.config, fbo.id(),
+	rmds, err := getMergedMDUpdates(ctx, fbo.config, nil, fbo.id(),
 		MetadataRevisionInitial)
 	if err != nil {
 		return TLFUpdateHistory{}, err

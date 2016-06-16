@@ -125,7 +125,7 @@ func (sc *StateChecker) CheckMergedState(ctx context.Context, tlf TlfID) error {
 
 	// Fetch all the MD updates for this folder, and use the block
 	// change lists to build up the set of currently referenced blocks.
-	rmds, err := getMergedMDUpdates(ctx, sc.config, tlf,
+	rmds, err := getMergedMDUpdates(ctx, sc.config, nil, tlf,
 		MetadataRevisionInitial)
 	if err != nil {
 		return err

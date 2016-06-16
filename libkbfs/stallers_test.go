@@ -142,17 +142,17 @@ func (m *stallingMDOps) GetUnmergedForTLF(ctx context.Context, id TlfID,
 	return m.delegate.GetUnmergedForTLF(ctx, id, bid)
 }
 
-func (m *stallingMDOps) GetRange(ctx context.Context, id TlfID,
+func (m *stallingMDOps) GetRange(ctx context.Context, h *TlfHandle, id TlfID,
 	start, stop MetadataRevision) (
 	[]*RootMetadata, error) {
 	m.maybeStall(ctx, "GetRange")
-	return m.delegate.GetRange(ctx, id, start, stop)
+	return m.delegate.GetRange(ctx, h, id, start, stop)
 }
 
-func (m *stallingMDOps) GetUnmergedRange(ctx context.Context, id TlfID,
+func (m *stallingMDOps) GetUnmergedRange(ctx context.Context, h *TlfHandle, id TlfID,
 	bid BranchID, start, stop MetadataRevision) ([]*RootMetadata, error) {
 	m.maybeStall(ctx, "GetUnmergedRange")
-	return m.delegate.GetUnmergedRange(ctx, id, bid, start, stop)
+	return m.delegate.GetUnmergedRange(ctx, h, id, bid, start, stop)
 }
 
 func (m *stallingMDOps) Put(ctx context.Context, md *RootMetadata) error {

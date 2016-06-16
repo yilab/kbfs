@@ -723,13 +723,14 @@ type MDOps interface {
 
 	// GetRange returns a range of metadata objects corresponding to
 	// the passed revision numbers (inclusive).
-	GetRange(ctx context.Context, id TlfID, start, stop MetadataRevision) (
-		[]*RootMetadata, error)
+	GetRange(ctx context.Context, h *TlfHandle, id TlfID,
+		start, stop MetadataRevision) ([]*RootMetadata, error)
 
 	// GetUnmergedRange is the same as the above but for unmerged
 	// metadata history (inclusive).
-	GetUnmergedRange(ctx context.Context, id TlfID, bid BranchID,
-		start, stop MetadataRevision) ([]*RootMetadata, error)
+	GetUnmergedRange(ctx context.Context, h *TlfHandle, id TlfID,
+		bid BranchID, start, stop MetadataRevision) (
+		[]*RootMetadata, error)
 
 	// Put stores the metadata object for the given
 	// top-level folder.
