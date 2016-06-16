@@ -3246,9 +3246,13 @@ func (fbo *folderBranchOps) applyMDUpdates(ctx context.Context,
 // is done by applyFunc.
 func (fbo *folderBranchOps) getAndApplyMDUpdates(ctx context.Context,
 	lState *lockState, applyFunc applyMDUpdatesFunc) error {
+	start := MetadataRevisionInitial
+	head := fbo.getHead(lState)
+	if head != nil {
+		start = head.Revision + 1
+	}
 	// first look up all MD revisions newer than my current head
-	start := fbo.getCurrMDRevision(lState) + 1
-	rmds, err := getMergedMDUpdates(ctx, fbo.config, nil, fbo.id(), start)
+	rmds, err := getMergedMDUpdates(ctx, fbo.config, head.GetTlfHandle(), fbo.id(), start)
 	if err != nil {
 		return err
 	}
