@@ -2710,7 +2710,7 @@ func (fbo *folderBranchOps) RemoveDir(
 func (fbo *folderBranchOps) RemoveEntry(ctx context.Context, dir Node,
 	name string) (err error) {
 	fbo.log.CDebugf(ctx, "RemoveEntry %p %s", dir.GetID(), name)
-	defer func() { fbo.deferLog.CDebugf(ctx, "Done: %v", err) }()
+	defer func() { fbo.deferLog.CDebugf(ctx, "RemoveEntry Done: %v", err) }()
 
 	err = fbo.checkNode(dir)
 	if err != nil {
