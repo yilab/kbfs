@@ -50,8 +50,7 @@ type rpcLogFactory struct {
 
 func (r rpcLogFactory) NewLog(a net.Addr) rpc.LogInterface {
 	opts := rpc.NewStandardLogOptions(r.ctx.GetLocalRPCDebug(), r.log)
-	rpcLog := r.log.CloneWithAddedDepth(2)
-	ret := rpc.SimpleLog{Addr: a, Out: rpcLog, Opts: opts}
+	ret := rpc.SimpleLog{Addr: a, Out: r.log, Opts: opts}
 	ret.TransportStart()
 	return ret
 }
