@@ -223,16 +223,17 @@ func makeBlockReference(id BlockID, context BlockContext) keybase1.BlockReferenc
 // Get implements the BlockServer interface for BlockServerRemote.
 func (b *BlockServerRemote) Get(ctx context.Context, tlfID TlfID, id BlockID,
 	context BlockContext) ([]byte, BlockCryptKeyServerHalf, error) {
+	b.log.CDebugf(ctx, "Get id=%s tlf=%s context=%s", id, tlfID, context)
 	var err error
 	size := -1
 	defer func() {
 		if err != nil {
 			b.deferLog.CWarningf(
-				ctx, "Get id=%s tlf=%s context=%s sz=%d err=%v",
+				ctx, "Get done id=%s tlf=%s context=%s sz=%d err=%v",
 				id, tlfID, context, size, err)
 		} else {
 			b.deferLog.CDebugf(
-				ctx, "Get id=%s tlf=%s context=%s sz=%d",
+				ctx, "Get done id=%s tlf=%s context=%s sz=%d",
 				id, tlfID, context, size)
 		}
 	}()
@@ -261,16 +262,18 @@ func (b *BlockServerRemote) Get(ctx context.Context, tlfID TlfID, id BlockID,
 func (b *BlockServerRemote) Put(ctx context.Context, tlfID TlfID, id BlockID,
 	context BlockContext, buf []byte,
 	serverHalf BlockCryptKeyServerHalf) error {
+	b.log.CDebugf(ctx, "Put id=%s tlf=%s context=%s sz=%d",
+		id, tlfID, context, len(buf))
 	var err error
 	size := len(buf)
 	defer func() {
 		if err != nil {
 			b.deferLog.CWarningf(
-				ctx, "Put id=%s tlf=%s context=%s sz=%d err=%v",
+				ctx, "Put done id=%s tlf=%s context=%s sz=%d err=%v",
 				id, tlfID, context, size, err)
 		} else {
 			b.deferLog.CDebugf(
-				ctx, "Put id=%s tlf=%s context=%s sz=%d",
+				ctx, "Put done id=%s tlf=%s context=%s sz=%d",
 				id, tlfID, context, size)
 		}
 	}()
