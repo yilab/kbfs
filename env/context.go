@@ -57,7 +57,6 @@ func (c Context) ConfigureSocketInfo() error {
 	return c.g.ConfigureSocketInfo()
 }
 
-// NewRPCLogFactory constructs an RPC logger
-func (c Context) NewRPCLogFactory() *libkb.RPCLogFactory {
-	return &libkb.RPCLogFactory{Contextified: libkb.NewContextified(c.g)}
+func (c Context) GetLocalRPCDebug() string {
+	return c.g.Env.GetLocalRPCDebug()
 }

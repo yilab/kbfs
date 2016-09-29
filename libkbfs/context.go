@@ -18,5 +18,5 @@ type Context interface {
 	GetDataDir() string
 	ConfigureSocketInfo() (err error)
 	GetSocket(clearError bool) (net.Conn, rpc.Transporter, bool, error)
-	NewRPCLogFactory() *libkb.RPCLogFactory
+	GetLocalRPCDebug() string
 }

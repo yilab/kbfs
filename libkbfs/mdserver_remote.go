@@ -71,10 +71,11 @@ var _ rpc.ConnectionHandler = (*MDServerRemote)(nil)
 
 // NewMDServerRemote returns a new instance of MDServerRemote.
 func NewMDServerRemote(config Config, srvAddr string, ctx Context) *MDServerRemote {
+	log := config.MakeLogger("MSR")
 	mdServer := &MDServerRemote{
 		config:     config,
 		observers:  make(map[TlfID]chan<- error),
-		log:        config.MakeLogger(""),
+		log:        log,
 		mdSrvAddr:  srvAddr,
 		rekeyTimer: time.NewTimer(MdServerBackgroundRekeyPeriod),
 	}
@@ -83,8 +84,8 @@ func NewMDServerRemote(config Config, srvAddr string, ctx Context) *MDServerRemo
 		"libkbfs_mdserver_remote", mdServer)
 	conn := rpc.NewTLSConnection(srvAddr, GetRootCerts(srvAddr),
 		MDServerErrorUnwrapper{}, mdServer, true,
-		ctx.NewRPCLogFactory(), libkb.WrapError,
-		config.MakeLogger(""), LogTagsFromContext)
+		rpcLogFactory{ctx, log}, libkb.WrapError,
+		log, LogTagsFromContext)
 	mdServer.conn = conn
 	mdServer.client = keybase1.MetadataClient{Cli: conn.GetClient()}
 

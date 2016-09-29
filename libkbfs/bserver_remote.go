@@ -7,6 +7,7 @@ package libkbfs
 import (
 	"encoding/hex"
 	"errors"
+	"net"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -42,6 +43,18 @@ var _ BlockServer = (*BlockServerRemote)(nil)
 // Test that BlockServerRemote fully implements the AuthTokenRefreshHandler interface.
 var _ AuthTokenRefreshHandler = (*BlockServerRemote)(nil)
 
+type rpcLogFactory struct {
+	ctx Context
+	log logger.Logger
+}
+
+func (r rpcLogFactory) NewLog(a net.Addr) rpc.LogInterface {
+	opts := rpc.NewStandardLogOptions(r.ctx.GetLocalRPCDebug(), r.log)
+	ret := rpc.SimpleLog{Addr: a, Out: r.log, Opts: opts}
+	ret.TransportStart()
+	return ret
+}
+
 // NewBlockServerRemote constructs a new BlockServerRemote for the
 // given address.
 func NewBlockServerRemote(config Config, blkSrvAddr string, ctx Context) *BlockServerRemote {
@@ -59,8 +72,8 @@ func NewBlockServerRemote(config Config, blkSrvAddr string, ctx Context) *BlockS
 		"libkbfs_bserver_remote", bs)
 	// This will connect only on-demand due to the last argument.
 	conn := rpc.NewTLSConnection(blkSrvAddr, GetRootCerts(blkSrvAddr),
-		bServerErrorUnwrapper{}, bs, false, ctx.NewRPCLogFactory(),
-		libkb.WrapError, config.MakeLogger(""), LogTagsFromContext)
+		bServerErrorUnwrapper{}, bs, false, rpcLogFactory{ctx, log},
+		libkb.WrapError, log, LogTagsFromContext)
 	bs.client = keybase1.BlockClient{Cli: conn.GetClient()}
 	bs.shutdownFn = conn.Shutdown
 	return bs
