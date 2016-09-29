@@ -50,6 +50,7 @@ func (d *dispatch) Call(ctx context.Context, name string, arg interface{}, res i
 	if len(rpcTags) > 0 {
 		v = append(v, rpcTags)
 	}
+	d.log.ClientCall(c.seqid, c.method, c.arg)
 	errCh := d.writer.EncodeAndWrite(ctx, v)
 
 	// Wait for result from encode
