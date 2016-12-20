@@ -16,6 +16,7 @@ import (
 	"github.com/keybase/client/go/protocol/keybase1"
 	"github.com/keybase/kbfs/kbfscrypto"
 	"github.com/keybase/kbfs/kbfssync"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -3739,6 +3740,7 @@ func (cr *ConflictResolver) completeResolution(ctx context.Context,
 func (cr *ConflictResolver) maybeUnstageAfterFailure(ctx context.Context,
 	lState *lockState, mergedMDs []ImmutableRootMetadata, err error) error {
 	// Make sure the error is related to a missing block.
+	cause := errors.Cause(err)
 	_, isBlockNotFound := err.(BServerErrorBlockNonExistent)
 	_, isBlockDeleted := err.(BServerErrorBlockDeleted)
 	if !isBlockNotFound && !isBlockDeleted {

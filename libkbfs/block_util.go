@@ -46,7 +46,7 @@ func PutBlockCheckQuota(ctx context.Context, bserv BlockServer,
 	reporter Reporter, tlfID tlf.ID, blockPtr BlockPointer,
 	readyBlockData ReadyBlockData, tlfName CanonicalTlfName) error {
 	err := putBlockToServer(ctx, bserv, tlfID, blockPtr, readyBlockData)
-	if qe, ok := err.(BServerErrorOverQuota); ok && !qe.Throttled {
+	if qe, ok := errors.Cause(err).(BServerErrorOverQuota); ok && !qe.Throttled {
 		reporter.ReportErr(ctx, tlfName, tlfID.IsPublic(),
 			WriteMode, OverQuotaWarning{qe.Usage, qe.Limit})
 		return nil

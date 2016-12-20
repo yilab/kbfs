@@ -117,10 +117,10 @@ func (b *blockServerRemoteClientHandler) ShouldRetry(rpcName string, err error) 
 	case "keybase.1.block.archiveReference":
 		return false
 	}
-	if _, ok := err.(BServerErrorThrottle); ok {
+	if _, ok := errors.Cause(err).(BServerErrorThrottle); ok {
 		return true
 	}
-	if quotaErr, ok := err.(BServerErrorOverQuota); ok && quotaErr.Throttled {
+	if quotaErr, ok := errors.Cause(err).(BServerErrorOverQuota); ok && quotaErr.Throttled {
 		return true
 	}
 	return false
@@ -485,7 +485,7 @@ func (b *BlockServerRemote) batchDowngradeReferences(ctx context.Context,
 		// check whether to backoff and retry
 		if err != nil {
 			// if error is of type throttle, retry
-			if _, ok := err.(BServerErrorThrottle); ok {
+			if _, ok := errors.Cause(err).(BServerErrorThrottle); ok {
 				return err
 			}
 			// non-throttle error, do not retry here

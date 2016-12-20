@@ -1870,7 +1870,7 @@ func TestKBFSOpsErrorOnBlockedWriteDuringSync(t *testing.T) {
 	// Both errors should be an OverQuota error
 	syncErr := <-syncErrCh
 	writeErr := <-writeErrCh
-	if _, ok := syncErr.(BServerErrorOverQuota); !ok {
+	if _, ok := errors.Cause(syncErr).(BServerErrorOverQuota); !ok {
 		t.Fatalf("Unexpected sync err: %v", syncErr)
 	}
 	if writeErr != syncErr {
