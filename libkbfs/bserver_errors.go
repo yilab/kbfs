@@ -363,10 +363,10 @@ func (eu bServerErrorUnwrapper) UnwrapError(arg interface{}) (appError error, di
 func translateToBlockServerError(err error) error {
 	// TODO: Translate blockContextMismatchError, too, if the
 	// actual server returns a similar error.
-	switch err := errors.Cause(err).(type) {
+	switch cause := errors.Cause(err).(type) {
 	case blockNonExistentError:
 		return BServerErrorBlockNonExistent{fmt.Sprintf("%+v", err)}
 	default:
-		return err
+		return cause
 	}
 }

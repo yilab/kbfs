@@ -2077,8 +2077,9 @@ func isRecoverableBlockErrorForRemoval(err error) bool {
 }
 
 func isRetriableError(err error, retries int) bool {
-	_, isExclOnUnmergedError := err.(ExclOnUnmergedError)
-	_, isUnmergedSelfConflictError := err.(UnmergedSelfConflictError)
+	cause := errors.Cause(err)
+	_, isExclOnUnmergedError := cause.(ExclOnUnmergedError)
+	_, isUnmergedSelfConflictError := cause.(UnmergedSelfConflictError)
 	recoverable := isExclOnUnmergedError || isUnmergedSelfConflictError ||
 		isRecoverableBlockError(err)
 	return recoverable && retries < maxRetriesOnRecoverableErrors

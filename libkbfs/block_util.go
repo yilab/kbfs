@@ -9,14 +9,16 @@ import (
 
 	"github.com/keybase/client/go/logger"
 	"github.com/keybase/kbfs/tlf"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
 func isRecoverableBlockError(err error) bool {
-	_, isArchiveError := err.(BServerErrorBlockArchived)
-	_, isDeleteError := err.(BServerErrorBlockDeleted)
-	_, isRefError := err.(BServerErrorBlockNonExistent)
-	_, isMaxExceededError := err.(BServerErrorMaxRefExceeded)
+	cause := errors.Cause(err)
+	_, isArchiveError := cause.(BServerErrorBlockArchived)
+	_, isDeleteError := cause.(BServerErrorBlockDeleted)
+	_, isRefError := cause.(BServerErrorBlockNonExistent)
+	_, isMaxExceededError := cause.(BServerErrorMaxRefExceeded)
 	return isArchiveError || isDeleteError || isRefError || isMaxExceededError
 }
 
