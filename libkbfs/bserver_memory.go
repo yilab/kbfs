@@ -25,8 +25,9 @@ type blockMemEntry struct {
 // BlockServerMemory implements the BlockServer interface by just
 // storing blocks in memory.
 type BlockServerMemory struct {
-	crypto cryptoPure
-	log    logger.Logger
+	crypto   cryptoPure
+	log      logger.Logger
+	deferLog logger.Logger
 
 	lock sync.RWMutex
 	// m is nil after Shutdown() is called.
@@ -40,7 +41,8 @@ var _ blockServerLocal = (*BlockServerMemory)(nil)
 func NewBlockServerMemory(
 	crypto cryptoPure, log logger.Logger) *BlockServerMemory {
 	return &BlockServerMemory{
-		crypto, log, sync.RWMutex{}, make(map[BlockID]blockMemEntry),
+		crypto, log, log.CloneWithAddedDepth(1),
+		sync.RWMutex{}, make(map[BlockID]blockMemEntry),
 	}
 }
 
@@ -52,6 +54,10 @@ func (b *BlockServerMemory) Get(ctx context.Context, tlfID tlf.ID, id BlockID,
 	data []byte, serverHalf kbfscrypto.BlockCryptKeyServerHalf, err error) {
 	defer func() {
 		err = translateToBlockServerError(err)
+		if err != nil {
+			b.deferLog.CDebugf(ctx, "BlockServerMemory.Get id=%s tlfID=%s context=%s failed with %+v",
+				id, tlfID, context, err)
+		}
 	}()
 	b.log.CDebugf(ctx, "BlockServerMemory.Get id=%s tlfID=%s context=%s",
 		id, tlfID, context)
