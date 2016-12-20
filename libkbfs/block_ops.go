@@ -6,6 +6,7 @@ package libkbfs
 
 import (
 	"github.com/keybase/kbfs/tlf"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -37,7 +38,11 @@ func NewBlockOpsStandard(config Config, queueSize int) *BlockOpsStandard {
 func (b *BlockOpsStandard) Get(ctx context.Context, kmd KeyMetadata,
 	blockPtr BlockPointer, block Block) error {
 	errCh := b.queue.Request(ctx, defaultOnDemandRequestPriority, kmd, blockPtr, block)
-	return <-errCh
+	err := <-errCh
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 // Ready implements the BlockOps interface for BlockOpsStandard.
