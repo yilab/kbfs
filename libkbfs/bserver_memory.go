@@ -46,7 +46,11 @@ func NewBlockServerMemory(
 	}
 }
 
-var errBlockServerMemoryShutdown = errors.New("BlockServerMemory is shutdown")
+type errBlockServerMemoryShutdown struct{}
+
+func (e errBlockServerMemoryShutdown) Error() string {
+	return "BlockServerMemory is shutdown"
+}
 
 // Get implements the BlockServer interface for BlockServerMemory.
 func (b *BlockServerMemory) Get(ctx context.Context, tlfID tlf.ID, id BlockID,
@@ -66,7 +70,7 @@ func (b *BlockServerMemory) Get(ctx context.Context, tlfID tlf.ID, id BlockID,
 
 	if b.m == nil {
 		return nil, kbfscrypto.BlockCryptKeyServerHalf{},
-			errBlockServerMemoryShutdown
+			errors.WithStack(errBlockServerMemoryShutdown{})
 	}
 
 	entry, ok := b.m[id]
@@ -136,7 +140,7 @@ func (b *BlockServerMemory) Put(ctx context.Context, tlfID tlf.ID, id BlockID,
 	defer b.lock.Unlock()
 
 	if b.m == nil {
-		return errBlockServerMemoryShutdown
+		return errors.WithStack(errBlockServerMemoryShutdown{})
 	}
 
 	var refs blockRefMap
@@ -190,7 +194,7 @@ func (b *BlockServerMemory) AddBlockReference(ctx context.Context, tlfID tlf.ID,
 	defer b.lock.Unlock()
 
 	if b.m == nil {
-		return errBlockServerMemoryShutdown
+		return errors.WithStack(errBlockServerMemoryShutdown{})
 	}
 
 	entry, ok := b.m[id]
@@ -219,7 +223,7 @@ func (b *BlockServerMemory) removeBlockReference(
 	defer b.lock.Unlock()
 
 	if b.m == nil {
-		return 0, errBlockServerMemoryShutdown
+		return 0, errors.WithStack(errBlockServerMemoryShutdown{})
 	}
 
 	entry, ok := b.m[id]
@@ -273,7 +277,7 @@ func (b *BlockServerMemory) archiveBlockReference(
 	defer b.lock.Unlock()
 
 	if b.m == nil {
-		return errBlockServerMemoryShutdown
+		return errors.WithStack(errBlockServerMemoryShutdown{})
 	}
 
 	entry, ok := b.m[id]
@@ -331,7 +335,7 @@ func (b *BlockServerMemory) getAllRefsForTest(
 	defer b.lock.RUnlock()
 
 	if b.m == nil {
-		return nil, errBlockServerMemoryShutdown
+		return nil, errors.WithStack(errBlockServerMemoryShutdown{})
 	}
 
 	for id, entry := range b.m {
@@ -356,7 +360,7 @@ func (b *BlockServerMemory) IsUnflushed(ctx context.Context, tlfID tlf.ID,
 	defer b.lock.RUnlock()
 
 	if b.m == nil {
-		return false, errBlockServerMemoryShutdown
+		return false, errors.WithStack(errBlockServerMemoryShutdown{})
 	}
 
 	return false, nil
