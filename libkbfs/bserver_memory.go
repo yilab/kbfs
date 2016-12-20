@@ -66,7 +66,10 @@ func (b *BlockServerMemory) Get(ctx context.Context, tlfID tlf.ID, id BlockID,
 	entry, ok := b.m[id]
 	if !ok {
 		return nil, kbfscrypto.BlockCryptKeyServerHalf{},
-			BServerErrorBlockNonExistent{}
+			BServerErrorBlockNonExistent{
+				fmt.Sprintf("Block ID %s doesn't "+
+					"exist.", id),
+			}
 	}
 
 	if entry.tlfID != tlfID {
