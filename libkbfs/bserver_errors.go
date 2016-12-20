@@ -5,12 +5,13 @@
 package libkbfs
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/keybase/client/go/libkb"
 	"github.com/keybase/client/go/protocol/keybase1"
 	"github.com/keybase/go-framed-msgpack-rpc/rpc"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -362,9 +363,9 @@ func (eu bServerErrorUnwrapper) UnwrapError(arg interface{}) (appError error, di
 func translateToBlockServerError(err error) error {
 	// TODO: Translate blockContextMismatchError, too, if the
 	// actual server returns a similar error.
-	switch err := err.(type) {
+	switch err := errors.Cause(err).(type) {
 	case blockNonExistentError:
-		return BServerErrorBlockNonExistent{err.Error()}
+		return BServerErrorBlockNonExistent{fmt.Sprintf("%+v", err)}
 	default:
 		return err
 	}
