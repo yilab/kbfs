@@ -5,13 +5,13 @@
 package libkbfs
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 
 	"github.com/keybase/client/go/logger"
 	"github.com/keybase/kbfs/kbfscrypto"
 	"github.com/keybase/kbfs/tlf"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -72,12 +72,12 @@ func (b *BlockServerMemory) Get(ctx context.Context, tlfID tlf.ID, id BlockID,
 	entry, ok := b.m[id]
 	if !ok {
 		return nil, kbfscrypto.BlockCryptKeyServerHalf{},
-			blockNonExistentError{id}
+			errors.WithStack(blockNonExistentError{id})
 	}
 
 	if entry.tlfID != tlfID {
 		return nil, kbfscrypto.BlockCryptKeyServerHalf{},
-			fmt.Errorf("TLF ID mismatch: expected %s, got %s",
+			errors.Errorf("TLF ID mismatch: expected %s, got %s",
 				entry.tlfID, tlfID)
 	}
 
@@ -87,7 +87,7 @@ func (b *BlockServerMemory) Get(ctx context.Context, tlfID tlf.ID, id BlockID,
 	}
 	if !exists {
 		return nil, kbfscrypto.BlockCryptKeyServerHalf{},
-			blockNonExistentError{id}
+			errors.WithStack(blockNonExistentError{id})
 	}
 
 	return entry.blockData, entry.keyServerHalf, nil
@@ -96,7 +96,7 @@ func (b *BlockServerMemory) Get(ctx context.Context, tlfID tlf.ID, id BlockID,
 func validateBlockPut(
 	crypto cryptoPure, id BlockID, context BlockContext, buf []byte) error {
 	if context.GetCreator() != context.GetWriter() {
-		return fmt.Errorf("Can't Put() a block with creator=%s != writer=%s",
+		return errors.Errorf("Can't Put() a block with creator=%s != writer=%s",
 			context.GetCreator(), context.GetWriter())
 	}
 
@@ -110,7 +110,7 @@ func validateBlockPut(
 	}
 
 	if id != bufID {
-		return fmt.Errorf(
+		return errors.Errorf(
 			"Block ID mismatch: expected %s, got %s", id, bufID)
 	}
 
@@ -146,7 +146,7 @@ func (b *BlockServerMemory) Put(ctx context.Context, tlfID tlf.ID, id BlockID,
 		// references.
 
 		if entry.tlfID != tlfID {
-			return fmt.Errorf(
+			return errors.Errorf(
 				"TLF ID mismatch: expected %s, got %s",
 				entry.tlfID, tlfID)
 		}
@@ -156,7 +156,7 @@ func (b *BlockServerMemory) Put(ctx context.Context, tlfID tlf.ID, id BlockID,
 		// presumably already checked previously).
 
 		if entry.keyServerHalf != serverHalf {
-			return fmt.Errorf(
+			return errors.Errorf(
 				"key server half mismatch: expected %s, got %s",
 				entry.keyServerHalf, serverHalf)
 		}
@@ -200,7 +200,7 @@ func (b *BlockServerMemory) AddBlockReference(ctx context.Context, tlfID tlf.ID,
 	}
 
 	if entry.tlfID != tlfID {
-		return fmt.Errorf("TLF ID mismatch: expected %s, got %s",
+		return errors.Errorf("TLF ID mismatch: expected %s, got %s",
 			entry.tlfID, tlfID)
 	}
 
@@ -229,7 +229,7 @@ func (b *BlockServerMemory) removeBlockReference(
 	}
 
 	if entry.tlfID != tlfID {
-		return 0, fmt.Errorf("TLF ID mismatch: expected %s, got %s",
+		return 0, errors.Errorf("TLF ID mismatch: expected %s, got %s",
 			entry.tlfID, tlfID)
 	}
 
@@ -283,7 +283,7 @@ func (b *BlockServerMemory) archiveBlockReference(
 	}
 
 	if entry.tlfID != tlfID {
-		return fmt.Errorf("TLF ID mismatch: expected %s, got %s",
+		return errors.Errorf("TLF ID mismatch: expected %s, got %s",
 			entry.tlfID, tlfID)
 	}
 
