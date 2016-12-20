@@ -5,7 +5,6 @@
 package libkbfs
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/keybase/kbfs/kbfscodec"
 	"github.com/keybase/kbfs/kbfscrypto"
 	"github.com/keybase/kbfs/tlf"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -232,7 +232,7 @@ func TestBlockOpsGetFailGet(t *testing.T) {
 
 	block := &TestBlock{}
 	if err2 := config.BlockOps().Get(
-		ctx, kmd, blockPtr, block); err2 != err {
+		ctx, kmd, blockPtr, block); errors.Cause(err2) != err {
 		t.Errorf("Got bad error: %v", err2)
 	}
 }
@@ -253,7 +253,7 @@ func TestBlockOpsGetFailVerify(t *testing.T) {
 
 	block := &TestBlock{}
 	if err2 := config.BlockOps().Get(
-		ctx, kmd, blockPtr, block); err2 != err {
+		ctx, kmd, blockPtr, block); errors.Cause(err2) != err {
 		t.Errorf("Got bad error: %v", err2)
 	}
 }
@@ -275,7 +275,7 @@ func TestBlockOpsGetFailDecryptBlockData(t *testing.T) {
 	expectBlockDecrypt(config, kmd, blockPtr, encData, block, err)
 
 	if err2 := config.BlockOps().Get(
-		ctx, kmd, blockPtr, block); err2 != err {
+		ctx, kmd, blockPtr, block); errors.Cause(err2) != err {
 		t.Errorf("Got bad error: %v", err2)
 	}
 }
