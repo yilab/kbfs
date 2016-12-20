@@ -83,28 +83,28 @@ func sequential(actions ...optionOp) optionOp {
 	}
 }
 
-type errorList struct {
-	el []error
+type errorMap struct {
+	userErrors map[libkb.NormalizedUsername]error
 }
 
-func (el errorList) Error() string {
-	return fmt.Sprintf("%v", el.el)
+func (em errorMap) Error() string {
+	return fmt.Sprintf("%+v", em.userErrors)
 }
 
 func (o *opt) close() {
-	var el []error
+	userErrors := make(map[libkb.NormalizedUsername]error)
 	// Make sure Shutdown is called properly for every user, even
 	// if any of the calls fail.
-	for _, user := range o.users {
+	for username, user := range o.users {
 		err := o.engine.Shutdown(user)
 		if err != nil {
-			el = append(el, err)
+			userErrors[username] = err
 		}
 	}
 
 	var err error
-	if len(el) > 0 {
-		err = errorList{el}
+	if len(userErrors) > 0 {
+		err = errorMap{userErrors}
 	}
 
 	o.expectSuccess("Shutdown", err)
