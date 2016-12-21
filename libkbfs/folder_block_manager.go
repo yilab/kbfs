@@ -5,7 +5,6 @@
 package libkbfs
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/keybase/client/go/logger"
 	"github.com/keybase/kbfs/kbfssync"
 	"github.com/keybase/kbfs/tlf"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 

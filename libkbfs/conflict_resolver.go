@@ -3741,8 +3741,8 @@ func (cr *ConflictResolver) maybeUnstageAfterFailure(ctx context.Context,
 	lState *lockState, mergedMDs []ImmutableRootMetadata, err error) error {
 	// Make sure the error is related to a missing block.
 	cause := errors.Cause(err)
-	_, isBlockNotFound := err.(BServerErrorBlockNonExistent)
-	_, isBlockDeleted := err.(BServerErrorBlockDeleted)
+	_, isBlockNotFound := cause.(BServerErrorBlockNonExistent)
+	_, isBlockDeleted := cause.(BServerErrorBlockDeleted)
 	if !isBlockNotFound && !isBlockDeleted {
 		return err
 	}

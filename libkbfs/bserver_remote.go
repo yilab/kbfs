@@ -5,7 +5,6 @@
 package libkbfs
 
 import (
-	"errors"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -16,6 +15,7 @@ import (
 	"github.com/keybase/kbfs/kbfscodec"
 	"github.com/keybase/kbfs/kbfscrypto"
 	"github.com/keybase/kbfs/tlf"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
