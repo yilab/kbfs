@@ -156,7 +156,7 @@ func (tlf *TLF) Attr(ctx context.Context, a *fuse.Attr) error {
 func (tlf *TLF) Lookup(ctx context.Context, req *fuse.LookupRequest, resp *fuse.LookupResponse) (fs.Node, error) {
 	dir, exitEarly, err := tlf.loadDirAllowNonexistent(ctx)
 	if err != nil {
-		return nil, err
+		return nil, wrapErrorForBazil(err)
 	}
 	if exitEarly {
 		if node := handleTLFSpecialFile(
@@ -172,7 +172,7 @@ func (tlf *TLF) Lookup(ctx context.Context, req *fuse.LookupRequest, resp *fuse.
 func (tlf *TLF) Create(ctx context.Context, req *fuse.CreateRequest, resp *fuse.CreateResponse) (fs.Node, fs.Handle, error) {
 	dir, err := tlf.loadDir(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, wrapErrorForBazil(err)
 	}
 	return dir.Create(ctx, req, resp)
 }
@@ -181,7 +181,7 @@ func (tlf *TLF) Create(ctx context.Context, req *fuse.CreateRequest, resp *fuse.
 func (tlf *TLF) Mkdir(ctx context.Context, req *fuse.MkdirRequest) (_ fs.Node, err error) {
 	dir, err := tlf.loadDir(ctx)
 	if err != nil {
-		return nil, err
+		return nil, wrapErrorForBazil(err)
 	}
 	return dir.Mkdir(ctx, req)
 }
@@ -191,7 +191,7 @@ func (tlf *TLF) Symlink(ctx context.Context, req *fuse.SymlinkRequest) (
 	fs.Node, error) {
 	dir, err := tlf.loadDir(ctx)
 	if err != nil {
-		return nil, err
+		return nil, wrapErrorForBazil(err)
 	}
 	return dir.Symlink(ctx, req)
 }
@@ -201,7 +201,7 @@ func (tlf *TLF) Rename(ctx context.Context, req *fuse.RenameRequest,
 	newDir fs.Node) error {
 	dir, err := tlf.loadDir(ctx)
 	if err != nil {
-		return err
+		return wrapErrorForBazil(err)
 	}
 	return dir.Rename(ctx, req, newDir)
 }
@@ -210,7 +210,7 @@ func (tlf *TLF) Rename(ctx context.Context, req *fuse.RenameRequest,
 func (tlf *TLF) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
 	dir, err := tlf.loadDir(ctx)
 	if err != nil {
-		return err
+		return wrapErrorForBazil(err)
 	}
 	return dir.Remove(ctx, req)
 }
@@ -219,7 +219,7 @@ func (tlf *TLF) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
 func (tlf *TLF) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 	dir, exitEarly, err := tlf.loadDirAllowNonexistent(ctx)
 	if err != nil || exitEarly {
-		return nil, err
+		return nil, wrapErrorForBazil(err)
 	}
 	return dir.ReadDirAll(ctx)
 }
@@ -236,7 +236,7 @@ func (tlf *TLF) Forget() {
 func (tlf *TLF) Setattr(ctx context.Context, req *fuse.SetattrRequest, resp *fuse.SetattrResponse) error {
 	dir, err := tlf.loadDir(ctx)
 	if err != nil {
-		return err
+		return wrapErrorForBazil(err)
 	}
 	return dir.Setattr(ctx, req, resp)
 }
@@ -253,7 +253,7 @@ func (tlf *TLF) Open(ctx context.Context, req *fuse.OpenRequest,
 	// on a ReadDirAll.
 	_, _, err := tlf.loadDirAllowNonexistent(ctx)
 	if err != nil {
-		return nil, err
+		return nil, wrapErrorForBazil(err)
 	}
 	return tlf, nil
 }

@@ -24,7 +24,7 @@ var _ fs.Node = (*SpecialReadFile)(nil)
 func (f *SpecialReadFile) Attr(ctx context.Context, a *fuse.Attr) error {
 	data, t, err := f.read(ctx)
 	if err != nil {
-		return err
+		return wrapErrorForBazil(err)
 	}
 
 	// Have a low non-zero value for Valid to avoid being swamped
@@ -49,7 +49,7 @@ func (f *SpecialReadFile) Open(ctx context.Context, req *fuse.OpenRequest,
 	resp *fuse.OpenResponse) (fs.Handle, error) {
 	data, _, err := f.read(ctx)
 	if err != nil {
-		return nil, err
+		return nil, wrapErrorForBazil(err)
 	}
 
 	resp.Flags |= fuse.OpenDirectIO

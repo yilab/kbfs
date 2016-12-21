@@ -189,7 +189,7 @@ func (f *FS) reportErr(ctx context.Context,
 	//
 	// TODO: Classify errors and escalate the logging level of the
 	// important ones.
-	f.errLog.CDebugf(ctx, err.Error())
+	f.errLog.CDebugf(ctx, "%+v", err)
 }
 
 // Root implements the fs.FS interface for FS.
@@ -233,7 +233,10 @@ var _ fs.NodeRequestLookuper = (*Root)(nil)
 // Lookup implements the fs.NodeRequestLookuper interface for Root.
 func (r *Root) Lookup(ctx context.Context, req *fuse.LookupRequest, resp *fuse.LookupResponse) (_ fs.Node, err error) {
 	r.log().CDebugf(ctx, "FS Lookup %s", req.Name)
-	defer func() { r.private.fs.reportErr(ctx, libkbfs.ReadMode, err) }()
+	defer func() {
+		r.private.fs.reportErr(ctx, libkbfs.ReadMode, err)
+		err = wrapErrorForBazil(err)
+	}()
 
 	specialNode := handleNonTLFSpecialFile(
 		req.Name, r.private.fs, &resp.EntryValid)
@@ -275,14 +278,20 @@ var _ fs.NodeCreater = (*Root)(nil)
 // Create implements the fs.NodeCreater interface for Root.
 func (r *Root) Create(ctx context.Context, req *fuse.CreateRequest, resp *fuse.CreateResponse) (_ fs.Node, _ fs.Handle, err error) {
 	r.log().CDebugf(ctx, "FS Create")
-	defer func() { r.private.fs.reportErr(ctx, libkbfs.WriteMode, err) }()
+	defer func() {
+		r.private.fs.reportErr(ctx, libkbfs.WriteMode, err)
+		err = wrapErrorForBazil(err)
+	}()
 	return nil, nil, libkbfs.NewWriteUnsupportedError(libkbfs.BuildCanonicalPath(r.PathType(), req.Name))
 }
 
 // Mkdir implements the fs.NodeMkdirer interface for Root.
 func (r *Root) Mkdir(ctx context.Context, req *fuse.MkdirRequest) (_ fs.Node, err error) {
 	r.log().CDebugf(ctx, "FS Mkdir")
-	defer func() { r.private.fs.reportErr(ctx, libkbfs.WriteMode, err) }()
+	defer func() {
+		r.private.fs.reportErr(ctx, libkbfs.WriteMode, err)
+		err = wrapErrorForBazil(err)
+	}()
 	return nil, libkbfs.NewWriteUnsupportedError(libkbfs.BuildCanonicalPath(r.PathType(), req.Name))
 }
 
@@ -293,7 +302,10 @@ var _ fs.HandleReadDirAller = (*Root)(nil)
 // ReadDirAll implements the ReadDirAll interface for Root.
 func (r *Root) ReadDirAll(ctx context.Context) (res []fuse.Dirent, err error) {
 	r.log().CDebugf(ctx, "FS ReadDirAll")
-	defer func() { r.private.fs.reportErr(ctx, libkbfs.ReadMode, err) }()
+	defer func() {
+		r.private.fs.reportErr(ctx, libkbfs.ReadMode, err)
+		err = wrapErrorForBazil(err)
+	}()
 	res = []fuse.Dirent{
 		{
 			Type: fuse.DT_Dir,
