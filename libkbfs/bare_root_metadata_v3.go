@@ -619,12 +619,13 @@ func (md *BareRootMetadataV3) RevokeRemovedDevices(
 	return wRemovalInfo.mergeUsers(rRemovalInfo)
 }
 
-// GetDeviceKIDs implements the BareRootMetadata interface for BareRootMetadataV3.
-func (md *BareRootMetadataV3) GetDeviceKIDs(
-	keyGen KeyGen, user keybase1.UID, extra ExtraMetadata) ([]keybase1.KID, error) {
+// GetDeviceCryptPublicKeys implements the BareRootMetadata interface for BareRootMetadataV3.
+func (md *BareRootMetadataV3) GetDeviceCryptPublicKeys(
+	keyGen KeyGen, user keybase1.UID, extra ExtraMetadata) (
+	[]kbfscrypto.CryptPublicKey, error) {
 	if md.TlfID().IsPublic() {
 		return nil, InvalidPublicTLFOperation{
-			md.TlfID(), "GetDeviceKIDs", md.Version()}
+			md.TlfID(), "GetDeviceCryptPublicKeys", md.Version()}
 	}
 
 	wkb, rkb, err := md.getTLFKeyBundles(extra)
@@ -639,12 +640,12 @@ func (md *BareRootMetadataV3) GetDeviceKIDs(
 		}
 	}
 
-	kids := make([]keybase1.KID, 0, len(dkim))
+	keys := make([]kbfscrypto.CryptPublicKey, 0, len(dkim))
 	for key := range dkim {
-		kids = append(kids, key.KID())
+		keys = append(keys, key)
 	}
 
-	return kids, nil
+	return keys, nil
 }
 
 // HasKeyForUser implements the BareRootMetadata interface for BareRootMetadataV3.

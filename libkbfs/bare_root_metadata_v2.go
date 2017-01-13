@@ -652,13 +652,18 @@ func (md *BareRootMetadataV2) getTLFKeyBundles(keyGen KeyGen) (
 	return &md.WKeys[i], &md.RKeys[i], nil
 }
 
-// GetDeviceKIDs implements the BareRootMetadata interface for
+// GetDeviceCryptPublicKeys implements the BareRootMetadata interface for
 // BareRootMetadataV2.  Note that it is legal for the returned slice
 // to be empty, if they only have a Keybase username with no device
 // keys yet.
-func (md *BareRootMetadataV2) GetDeviceKIDs(
+func (md *BareRootMetadataV2) GetDeviceCryptPublicKeys(
 	keyGen KeyGen, user keybase1.UID, _ ExtraMetadata) (
-	[]keybase1.KID, error) {
+	[]kbfscrypto.CryptPublicKey, error) {
+	if md.TlfID().IsPublic() {
+		return nil, InvalidPublicTLFOperation{
+			md.TlfID(), "GetDeviceCryptPublicKeys", md.Version()}
+	}
+
 	wkb, rkb, err := md.getTLFKeyBundles(keyGen)
 	if err != nil {
 		return nil, err
@@ -672,12 +677,12 @@ func (md *BareRootMetadataV2) GetDeviceKIDs(
 		}
 	}
 
-	kids := make([]keybase1.KID, 0, len(dkim))
+	keys := make([]kbfscrypto.CryptPublicKey, 0, len(dkim))
 	for kid := range dkim {
-		kids = append(kids, kid)
+		keys = append(keys, kbfscrypto.MakeCryptPublicKey(kid))
 	}
 
-	return kids, nil
+	return keys, nil
 }
 
 // HasKeyForUser implements the BareRootMetadata interface for BareRootMetadataV2.
