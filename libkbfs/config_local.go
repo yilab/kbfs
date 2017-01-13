@@ -901,14 +901,15 @@ func (c *ConfigLocal) EnableJournaling(
 		c.DirtyBlockCache(), c.BlockServer(), c.MDOps(), branchListener,
 		flushListener)
 	ctx := context.Background()
-	uid, key, err := getCurrentUIDAndVerifyingKey(ctx, c.KBPKI())
+	session, err := c.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
-		log.Warning("Failed to get current UID and key; not enabling existing journals: %v", err)
+		log.Warning("Failed to get current UID and key; not enabling existing journals: %+v", err)
 		return
 	}
-	err = jServer.EnableExistingJournals(ctx, uid, key, bws)
+	err = jServer.EnableExistingJournals(
+		ctx, session.UID, session.VerifyingKey, bws)
 	if err != nil {
-		log.Warning("Failed to enable existing journals: %v", err)
+		log.Warning("Failed to enable existing journals: %+v", err)
 	}
 	c.SetBlockServer(jServer.blockServer())
 	c.SetMDOps(jServer.mdOps())

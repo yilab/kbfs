@@ -142,11 +142,11 @@ func (md *MDServerMemory) getHandleID(ctx context.Context, handle tlf.Handle,
 	}
 
 	// Non-readers shouldn't be able to create the dir.
-	_, uid, err := md.config.currentInfoGetter().GetCurrentUserInfo(ctx)
+	session, err := md.config.currentSessionGetter().GetCurrentSession(ctx)
 	if err != nil {
 		return tlf.NullID, false, MDServerError{err}
 	}
-	if !handle.IsReader(uid) {
+	if !handle.IsReader(session.UID) {
 		return tlf.NullID, false, MDServerErrorUnauthorized{}
 	}
 
@@ -195,7 +195,7 @@ func (md *MDServerMemory) checkGetParams(
 		return NullBranchID, MDServerError{err}
 	}
 
-	_, currentUID, err := md.config.currentInfoGetter().GetCurrentUserInfo(ctx)
+	session, err := md.config.currentSessionGetter().GetCurrentSession(ctx)
 	if err != nil {
 		return NullBranchID, MDServerError{err}
 	}
@@ -207,7 +207,7 @@ func (md *MDServerMemory) checkGetParams(
 		if err != nil {
 			return NullBranchID, MDServerError{err}
 		}
-		ok, err := isReader(currentUID, mergedMasterHead.MD, extra)
+		ok, err := isReader(session.UID, mergedMasterHead.MD, extra)
 		if err != nil {
 			return NullBranchID, MDServerError{err}
 		}
@@ -293,11 +293,11 @@ func (md *MDServerMemory) getBranchKey(ctx context.Context, id tlf.ID) (
 }
 
 func (md *MDServerMemory) getCurrentDeviceKID(ctx context.Context) (keybase1.KID, error) {
-	key, err := md.config.currentInfoGetter().GetCurrentCryptPublicKey(ctx)
+	session, err := md.config.currentSessionGetter().GetCurrentSession(ctx)
 	if err != nil {
 		return keybase1.KID(""), err
 	}
-	return key.KID(), nil
+	return session.CryptPublicKey.KID(), nil
 }
 
 // GetRange implements the MDServer interface for MDServerMemory.
@@ -367,8 +367,7 @@ func (md *MDServerMemory) GetRange(ctx context.Context, id tlf.ID,
 func (md *MDServerMemory) Put(ctx context.Context, rmds *RootMetadataSigned,
 	extra ExtraMetadata) error {
 
-	currentUID, currentVerifyingKey, err :=
-		getCurrentUIDAndVerifyingKey(ctx, md.config.currentInfoGetter())
+	session, err := md.config.currentSessionGetter().GetCurrentSession(ctx)
 	if err != nil {
 		return MDServerError{err}
 	}
@@ -379,7 +378,7 @@ func (md *MDServerMemory) Put(ctx context.Context, rmds *RootMetadataSigned,
 		return MDServerErrorBadRequest{Reason: err.Error()}
 	}
 
-	err = rmds.IsLastModifiedBy(currentUID, currentVerifyingKey)
+	err = rmds.IsLastModifiedBy(session.UID, session.VerifyingKey)
 	if err != nil {
 		return MDServerErrorBadRequest{Reason: err.Error()}
 	}
@@ -402,9 +401,8 @@ func (md *MDServerMemory) Put(ctx context.Context, rmds *RootMetadataSigned,
 			return MDServerError{err}
 		}
 		ok, err := isWriterOrValidRekey(
-			md.config.Codec(), currentUID,
-			mergedMasterHead.MD, rmds.MD,
-			prevExtra, extra)
+			md.config.Codec(), session.UID, mergedMasterHead.MD,
+			rmds.MD, prevExtra, extra)
 		if err != nil {
 			return MDServerError{err}
 		}

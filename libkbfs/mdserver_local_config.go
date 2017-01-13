@@ -15,7 +15,7 @@ type mdServerLocalConfig interface {
 	Clock() Clock
 	Codec() kbfscodec.Codec
 	cryptoPure() cryptoPure
-	currentInfoGetter() currentInfoGetter
+	currentSessionGetter() currentSessionGetter
 	MetadataVersion() MetadataVer
 	MakeLogger(module string) logger.Logger
 }
@@ -30,6 +30,6 @@ func (ca mdServerLocalConfigAdapter) cryptoPure() cryptoPure {
 	return ca.Config.Crypto()
 }
 
-func (ca mdServerLocalConfigAdapter) currentInfoGetter() currentInfoGetter {
+func (ca mdServerLocalConfigAdapter) currentSessionGetter() currentSessionGetter {
 	return ca.Config.KBPKI()
 }

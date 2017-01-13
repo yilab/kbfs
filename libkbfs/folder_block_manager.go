@@ -985,12 +985,13 @@ func (fbm *folderBlockManager) doReclamation(timer *time.Timer) (err error) {
 	}
 
 	// Make sure we're a writer
-	username, uid, err := fbm.config.KBPKI().GetCurrentUserInfo(ctx)
+	session, err := fbm.config.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		return err
 	}
-	if !head.GetTlfHandle().IsWriter(uid) {
-		return NewWriteAccessError(head.GetTlfHandle(), username, head.GetTlfHandle().GetCanonicalPath())
+	if !head.GetTlfHandle().IsWriter(session.UID) {
+		return NewWriteAccessError(head.GetTlfHandle(), session.Name,
+			head.GetTlfHandle().GetCanonicalPath())
 	}
 
 	if !fbm.isQRNecessary(head) {
