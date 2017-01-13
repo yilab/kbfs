@@ -4689,8 +4689,8 @@ func (_mr *_MockBareRootMetadataRecorder) IsFinal() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsFinal")
 }
 
-func (_m *MockBareRootMetadata) IsWriter(user keybase1.UID, deviceKID keybase1.KID, extra ExtraMetadata) bool {
-	ret := _m.ctrl.Call(_m, "IsWriter", user, deviceKID, extra)
+func (_m *MockBareRootMetadata) IsWriter(user keybase1.UID, deviceKey kbfscrypto.CryptPublicKey, extra ExtraMetadata) bool {
+	ret := _m.ctrl.Call(_m, "IsWriter", user, deviceKey, extra)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
@@ -4699,8 +4699,8 @@ func (_mr *_MockBareRootMetadataRecorder) IsWriter(arg0, arg1, arg2 interface{})
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsWriter", arg0, arg1, arg2)
 }
 
-func (_m *MockBareRootMetadata) IsReader(user keybase1.UID, deviceKID keybase1.KID, extra ExtraMetadata) bool {
-	ret := _m.ctrl.Call(_m, "IsReader", user, deviceKID, extra)
+func (_m *MockBareRootMetadata) IsReader(user keybase1.UID, deviceKey kbfscrypto.CryptPublicKey, extra ExtraMetadata) bool {
+	ret := _m.ctrl.Call(_m, "IsReader", user, deviceKey, extra)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
@@ -4773,15 +4773,15 @@ func (_mr *_MockBareRootMetadataRecorder) TlfHandleExtensions() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "TlfHandleExtensions")
 }
 
-func (_m *MockBareRootMetadata) GetDeviceKIDs(keyGen KeyGen, user keybase1.UID, extra ExtraMetadata) ([]keybase1.KID, error) {
-	ret := _m.ctrl.Call(_m, "GetDeviceKIDs", keyGen, user, extra)
-	ret0, _ := ret[0].([]keybase1.KID)
+func (_m *MockBareRootMetadata) GetDeviceCryptPublicKeys(keyGen KeyGen, user keybase1.UID, extra ExtraMetadata) ([]kbfscrypto.CryptPublicKey, error) {
+	ret := _m.ctrl.Call(_m, "GetDeviceCryptPublicKeys", keyGen, user, extra)
+	ret0, _ := ret[0].([]kbfscrypto.CryptPublicKey)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (_mr *_MockBareRootMetadataRecorder) GetDeviceKIDs(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetDeviceKIDs", arg0, arg1, arg2)
+func (_mr *_MockBareRootMetadataRecorder) GetDeviceCryptPublicKeys(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetDeviceCryptPublicKeys", arg0, arg1, arg2)
 }
 
 func (_m *MockBareRootMetadata) HasKeyForUser(keyGen KeyGen, user keybase1.UID, extra ExtraMetadata) bool {
@@ -5127,8 +5127,8 @@ func (_mr *_MockMutableBareRootMetadataRecorder) IsFinal() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsFinal")
 }
 
-func (_m *MockMutableBareRootMetadata) IsWriter(user keybase1.UID, deviceKID keybase1.KID, extra ExtraMetadata) bool {
-	ret := _m.ctrl.Call(_m, "IsWriter", user, deviceKID, extra)
+func (_m *MockMutableBareRootMetadata) IsWriter(user keybase1.UID, deviceKey kbfscrypto.CryptPublicKey, extra ExtraMetadata) bool {
+	ret := _m.ctrl.Call(_m, "IsWriter", user, deviceKey, extra)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
@@ -5137,8 +5137,8 @@ func (_mr *_MockMutableBareRootMetadataRecorder) IsWriter(arg0, arg1, arg2 inter
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsWriter", arg0, arg1, arg2)
 }
 
-func (_m *MockMutableBareRootMetadata) IsReader(user keybase1.UID, deviceKID keybase1.KID, extra ExtraMetadata) bool {
-	ret := _m.ctrl.Call(_m, "IsReader", user, deviceKID, extra)
+func (_m *MockMutableBareRootMetadata) IsReader(user keybase1.UID, deviceKey kbfscrypto.CryptPublicKey, extra ExtraMetadata) bool {
+	ret := _m.ctrl.Call(_m, "IsReader", user, deviceKey, extra)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
@@ -5211,15 +5211,15 @@ func (_mr *_MockMutableBareRootMetadataRecorder) TlfHandleExtensions() *gomock.C
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "TlfHandleExtensions")
 }
 
-func (_m *MockMutableBareRootMetadata) GetDeviceKIDs(keyGen KeyGen, user keybase1.UID, extra ExtraMetadata) ([]keybase1.KID, error) {
-	ret := _m.ctrl.Call(_m, "GetDeviceKIDs", keyGen, user, extra)
-	ret0, _ := ret[0].([]keybase1.KID)
+func (_m *MockMutableBareRootMetadata) GetDeviceCryptPublicKeys(keyGen KeyGen, user keybase1.UID, extra ExtraMetadata) ([]kbfscrypto.CryptPublicKey, error) {
+	ret := _m.ctrl.Call(_m, "GetDeviceCryptPublicKeys", keyGen, user, extra)
+	ret0, _ := ret[0].([]kbfscrypto.CryptPublicKey)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (_mr *_MockMutableBareRootMetadataRecorder) GetDeviceKIDs(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetDeviceKIDs", arg0, arg1, arg2)
+func (_mr *_MockMutableBareRootMetadataRecorder) GetDeviceCryptPublicKeys(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetDeviceCryptPublicKeys", arg0, arg1, arg2)
 }
 
 func (_m *MockMutableBareRootMetadata) HasKeyForUser(keyGen KeyGen, user keybase1.UID, extra ExtraMetadata) bool {
