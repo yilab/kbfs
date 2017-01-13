@@ -375,7 +375,7 @@ func TestCRMergedChainsSimple(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -384,10 +384,10 @@ func TestCRMergedChainsSimple(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodes := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dir"})
 	dir1 := nodes[uid1]
-	dir2 := nodes[uid2]
+	dir2 := nodes[session2.UID]
 	fb := dir1.GetFolderBranch()
 
 	// pause user 2
@@ -435,7 +435,7 @@ func TestCRMergedChainsDifferentDirectories(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -444,12 +444,12 @@ func TestCRMergedChainsDifferentDirectories(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodesA := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dirA"})
 	dirA1 := nodesA[uid1]
 	nodesB := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dirB"})
 	dirB1 := nodesB[uid1]
-	dirB2 := nodesB[uid2]
+	dirB2 := nodesB[session2.UID]
 	fb := dirA1.GetFolderBranch()
 
 	// pause user 2
@@ -497,7 +497,7 @@ func TestCRMergedChainsDeletedDirectories(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -506,7 +506,7 @@ func TestCRMergedChainsDeletedDirectories(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodesA := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dirA"})
 	dirA1 := nodesA[uid1]
 	fb := dirA1.GetFolderBranch()
@@ -520,7 +520,7 @@ func TestCRMergedChainsDeletedDirectories(t *testing.T) {
 	dirB1 := nodesB[uid1]
 	nodesC := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
 		[]string{"dirA", "dirB", "dirC"})
-	dirC2 := nodesC[uid2]
+	dirC2 := nodesC[session2.UID]
 	dirAPtr := cr1.fbo.nodeCache.PathFromNode(dirA1).tailPointer()
 	dirBPtr := cr1.fbo.nodeCache.PathFromNode(dirB1).tailPointer()
 	dirCPtr := cr2.fbo.nodeCache.PathFromNode(dirC2).tailPointer()
@@ -594,7 +594,7 @@ func TestCRMergedChainsRenamedDirectory(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -603,7 +603,7 @@ func TestCRMergedChainsRenamedDirectory(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodesA := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dirA"})
 	dirA1 := nodesA[uid1]
 	fb := dirA1.GetFolderBranch()
@@ -618,7 +618,7 @@ func TestCRMergedChainsRenamedDirectory(t *testing.T) {
 	nodesC := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
 		[]string{"dirA", "dirB", "dirC"})
 	dirC1 := nodesC[uid1]
-	dirC2 := nodesC[uid2]
+	dirC2 := nodesC[session2.UID]
 	dirCPtr := cr1.fbo.nodeCache.PathFromNode(dirC1).tailPointer()
 
 	// pause user 2
@@ -674,7 +674,7 @@ func TestCRMergedChainsComplex(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -689,10 +689,10 @@ func TestCRMergedChainsComplex(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodesA := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dirA"})
 	dirA1 := nodesA[uid1]
-	dirA2 := nodesA[uid2]
+	dirA2 := nodesA[session2.UID]
 	fb := dirA1.GetFolderBranch()
 
 	cr1 := testCRGetCROrBust(t, config1, fb)
@@ -702,19 +702,19 @@ func TestCRMergedChainsComplex(t *testing.T) {
 	nodesB := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
 		[]string{"dirA", "dirB"})
 	dirB1 := nodesB[uid1]
-	dirB2 := nodesB[uid2]
+	dirB2 := nodesB[session2.UID]
 	nodesC := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
 		[]string{"dirA", "dirB", "dirC"})
-	dirC2 := nodesC[uid2]
+	dirC2 := nodesC[session2.UID]
 	nodesD := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
 		[]string{"dirA", "dirB", "dirD"})
 	dirD1 := nodesD[uid1]
-	dirD2 := nodesD[uid2]
+	dirD2 := nodesD[session2.UID]
 	nodesE := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dirE"})
 	dirE1 := nodesE[uid1]
 	nodesF := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
 		[]string{"dirE", "dirF"})
-	dirF2 := nodesF[uid2]
+	dirF2 := nodesF[session2.UID]
 	dirEPtr := cr2.fbo.nodeCache.PathFromNode(dirE1).tailPointer()
 	dirFPtr := cr2.fbo.nodeCache.PathFromNode(dirF2).tailPointer()
 	nodesG := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dirG"})
@@ -722,7 +722,7 @@ func TestCRMergedChainsComplex(t *testing.T) {
 	nodesH := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
 		[]string{"dirG", "dirH"})
 	dirH1 := nodesH[uid1]
-	dirH2 := nodesH[uid2]
+	dirH2 := nodesH[session2.UID]
 	dirHPtr := cr1.fbo.nodeCache.PathFromNode(dirH1).tailPointer()
 
 	_, _, err = config1.KBFSOps().CreateFile(ctx, dirD1, "file5", false, NoExcl)
@@ -859,7 +859,7 @@ func TestCRMergedChainsRenameCycleSimple(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -868,10 +868,10 @@ func TestCRMergedChainsRenameCycleSimple(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodesRoot := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"root"})
 	dirRoot1 := nodesRoot[uid1]
-	dirRoot2 := nodesRoot[uid2]
+	dirRoot2 := nodesRoot[session2.UID]
 	fb := dirRoot1.GetFolderBranch()
 
 	nodesA := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
@@ -881,7 +881,7 @@ func TestCRMergedChainsRenameCycleSimple(t *testing.T) {
 	nodesB := testCRSharedFolderForUsers(t, ctx, name, uid1, configs,
 		[]string{"root", "dirB"})
 	dirB1 := nodesB[uid1]
-	dirB2 := nodesB[uid2]
+	dirB2 := nodesB[session2.UID]
 
 	cr1 := testCRGetCROrBust(t, config1, fb)
 	cr2 := testCRGetCROrBust(t, config2, fb)
@@ -945,7 +945,7 @@ func TestCRMergedChainsConflictSimple(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -957,10 +957,10 @@ func TestCRMergedChainsConflictSimple(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodesRoot := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"root"})
 	dirRoot1 := nodesRoot[uid1]
-	dirRoot2 := nodesRoot[uid2]
+	dirRoot2 := nodesRoot[session2.UID]
 	fb := dirRoot1.GetFolderBranch()
 
 	cr1 := testCRGetCROrBust(t, config1, fb)
@@ -1013,7 +1013,7 @@ func TestCRMergedChainsConflictFileCollapse(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1025,10 +1025,10 @@ func TestCRMergedChainsConflictFileCollapse(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodesRoot := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"root"})
 	dirRoot1 := nodesRoot[uid1]
-	dirRoot2 := nodesRoot[uid2]
+	dirRoot2 := nodesRoot[session2.UID]
 	fb := dirRoot1.GetFolderBranch()
 
 	cr1 := testCRGetCROrBust(t, config1, fb)
@@ -1122,7 +1122,7 @@ func TestCRDoActionsSimple(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1131,10 +1131,10 @@ func TestCRDoActionsSimple(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodes := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dir"})
 	dir1 := nodes[uid1]
-	dir2 := nodes[uid2]
+	dir2 := nodes[session2.UID]
 	fb := dir1.GetFolderBranch()
 
 	// pause user 2
@@ -1210,7 +1210,7 @@ func TestCRDoActionsWriteConflict(t *testing.T) {
 
 	config2 := ConfigAsUser(config1, userName2)
 	defer CheckConfigAndShutdown(ctx, t, config2)
-	_, uid2, err := config2.KBPKI().GetCurrentUserInfo(ctx)
+	session2, err := config2.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1222,10 +1222,10 @@ func TestCRDoActionsWriteConflict(t *testing.T) {
 
 	configs := make(map[keybase1.UID]Config)
 	configs[uid1] = config1
-	configs[uid2] = config2
+	configs[session2.UID] = config2
 	nodes := testCRSharedFolderForUsers(t, ctx, name, uid1, configs, []string{"dir"})
 	dir1 := nodes[uid1]
-	dir2 := nodes[uid2]
+	dir2 := nodes[session2.UID]
 	fb := dir1.GetFolderBranch()
 
 	// user1 makes a file
