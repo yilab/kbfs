@@ -988,7 +988,7 @@ type KeyOps interface {
 	// DeleteTLFCryptKeyServerHalf deletes a server-side key half for a
 	// device given the key half ID.
 	DeleteTLFCryptKeyServerHalf(ctx context.Context,
-		uid keybase1.UID, kid keybase1.KID,
+		uid keybase1.UID, key kbfscrypto.CryptPublicKey,
 		serverHalfID TLFCryptKeyServerHalfID) error
 }
 
@@ -1306,7 +1306,7 @@ type KeyServer interface {
 	// DeleteTLFCryptKeyServerHalf deletes a server-side key half for a
 	// device given the key half ID.
 	DeleteTLFCryptKeyServerHalf(ctx context.Context,
-		uid keybase1.UID, kid keybase1.KID,
+		uid keybase1.UID, key kbfscrypto.CryptPublicKey,
 		serverHalfID TLFCryptKeyServerHalfID) error
 
 	// Shutdown is called to free any KeyServer resources.
