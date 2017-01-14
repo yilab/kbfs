@@ -360,10 +360,12 @@ func (b *BlockServerMemory) Shutdown() {
 	b.m = nil
 }
 
+// OnLogin implements the BlockServer interface for BlockServerMemory.
 func (b *BlockServerMemory) OnLogin(
 	_ context.Context, _ kbfscrypto.AuthUserInfo) {
 }
 
+// OnLogout implements the BlockServer interface for BlockServerMemory.
 func (b *BlockServerMemory) OnLogout(_ context.Context) {}
 
 // GetUserQuotaInfo implements the BlockServer interface for BlockServerMemory.

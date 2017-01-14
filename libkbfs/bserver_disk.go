@@ -364,10 +364,12 @@ func (b *BlockServerDisk) Shutdown() {
 	}
 }
 
+// OnLogin implements the BlockServer interface for BlockServerDisk.
 func (b *BlockServerDisk) OnLogin(
 	_ context.Context, _ kbfscrypto.AuthUserInfo) {
 }
 
+// OnLogout implements the BlockServer interface for BlockServerDisk.
 func (b *BlockServerDisk) OnLogout(_ context.Context) {}
 
 // GetUserQuotaInfo implements the BlockServer interface for BlockServerDisk.

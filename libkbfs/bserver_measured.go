@@ -114,11 +114,13 @@ func (b BlockServerMeasured) Shutdown() {
 	b.delegate.Shutdown()
 }
 
+// OnLogin implements the BlockServer interface for BlockServerMeasured.
 func (b BlockServerMeasured) OnLogin(
 	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
 	b.delegate.OnLogin(ctx, userInfo)
 }
 
+// OnLogout implements the BlockServer interface for BlockServerMeasured.
 func (b BlockServerMeasured) OnLogout(ctx context.Context) {
 	b.delegate.OnLogout(ctx)
 }

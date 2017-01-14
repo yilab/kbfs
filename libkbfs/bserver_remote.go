@@ -283,6 +283,7 @@ func (b *BlockServerRemote) resetAuth(
 	return c.AuthenticateSession(ctx, signature)
 }
 
+// OnLogin implements the BlockServer interface for BlockServerRemote.
 func (b *BlockServerRemote) OnLogin(
 	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
 	b.setUserInfo(&userInfo)
@@ -295,6 +296,7 @@ func (b *BlockServerRemote) OnLogin(
 	}
 }
 
+// OnLogout implements the BlockServer interface for BlockServerRemote.
 func (b *BlockServerRemote) OnLogout(ctx context.Context) {
 	b.setUserInfo(nil)
 
