@@ -15,6 +15,7 @@ import (
 	"github.com/keybase/client/go/logger"
 	"github.com/keybase/client/go/protocol/keybase1"
 	"github.com/keybase/kbfs/ioutil"
+	"github.com/keybase/kbfs/kbfscrypto"
 	"github.com/keybase/kbfs/tlf"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -526,6 +527,14 @@ func (md *MDServerDisk) Shutdown() {
 func (md *MDServerDisk) IsConnected() bool {
 	return !md.isShutdown()
 }
+
+// OnLogin implements the MDServer interface for MDServerDisk.
+func (md *MDServerDisk) OnLogin(
+	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+}
+
+// OnLogout implements the MDServer interface for MDServerDisk.
+func (md *MDServerDisk) OnLogout(ctx context.Context) {}
 
 // RefreshAuthToken implements the MDServer interface for MDServerDisk.
 func (md *MDServerDisk) RefreshAuthToken(ctx context.Context) {}

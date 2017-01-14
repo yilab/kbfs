@@ -237,14 +237,14 @@ func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClie
 }
 
 // OnLogin implements the MDServer interface for MDServerRemote.
-func (b *MDServerRemote) OnLogin(
+func (md *MDServerRemote) OnLogin(
 	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
-	b.setUserInfo(ctx, userInfo)
+	md.setUserInfo(ctx, userInfo)
 }
 
 // OnLogout implements the MDServer interface for MDServerRemote.
-func (b *MDServerRemote) OnLogout(ctx context.Context) {
-	b.setUserInfo(ctx, kbfscrypto.AuthUserInfo{})
+func (md *MDServerRemote) OnLogout(ctx context.Context) {
+	md.setUserInfo(ctx, kbfscrypto.AuthUserInfo{})
 }
 
 // RefreshAuthToken implements the AuthTokenRefreshHandler interface.

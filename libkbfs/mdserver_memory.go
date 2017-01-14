@@ -647,6 +647,14 @@ func (md *MDServerMemory) IsConnected() bool {
 	return !md.isShutdown()
 }
 
+// OnLogin implements the MDServer interface for MDServerMemory.
+func (md *MDServerMemory) OnLogin(
+	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+}
+
+// OnLogout implements the MDServer interface for MDServerMemory.
+func (md *MDServerMemory) OnLogout(ctx context.Context) {}
+
 // RefreshAuthToken implements the MDServer interface for MDServerMemory.
 func (md *MDServerMemory) RefreshAuthToken(ctx context.Context) {}
 
