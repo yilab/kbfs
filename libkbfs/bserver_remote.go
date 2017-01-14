@@ -246,6 +246,12 @@ func (b *BlockServerRemote) getUserInfo() *kbfscrypto.AuthUserInfo {
 	return b.userInfo
 }
 
+func (b *BlockServerRemote) setUserInfo(userInfo *kbfscrypto.AuthUserInfo) {
+	b.userInfoLock.Lock()
+	defer b.userInfoLock.Unlock()
+	b.userInfo = userInfo
+}
+
 // resetAuth is called to reset the authorization on a BlockServer
 // connection.
 func (b *BlockServerRemote) resetAuth(
@@ -255,8 +261,6 @@ func (b *BlockServerRemote) resetAuth(
 	defer func() {
 		b.log.Debug("BlockServerRemote: resetAuth called, err: %#v", err)
 	}()
-
-	b.updateUserInfo(ctx)
 
 	userInfo := b.getUserInfo()
 	if userInfo == nil {
@@ -281,7 +285,7 @@ func (b *BlockServerRemote) resetAuth(
 
 func (b *BlockServerRemote) OnLogin(
 	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
-	b.updateUserInfo(ctx)
+	b.setUserInfo(&userInfo)
 
 	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
 		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
@@ -292,7 +296,7 @@ func (b *BlockServerRemote) OnLogin(
 }
 
 func (b *BlockServerRemote) OnLogout(ctx context.Context) {
-	b.updateUserInfo(ctx)
+	b.setUserInfo(nil)
 
 	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
 		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
