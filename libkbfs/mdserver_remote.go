@@ -46,6 +46,10 @@ type MDServerRemote struct {
 	authenticatedMtx sync.Mutex
 	isAuthenticated  bool
 
+	userInfoLock sync.RWMutex
+	// userInfo is the zero value when there is no logged-in user.
+	userInfo kbfscrypto.AuthUserInfo
+
 	observerMu sync.Mutex // protects observers
 	observers  map[tlf.ID]chan<- error
 
@@ -153,11 +157,31 @@ func (md *MDServerRemote) OnConnect(ctx context.Context,
 	return nil
 }
 
+func (md *MDServerRemote) getUserInfo() kbfscrypto.AuthUserInfo {
+	md.userInfoLock.RLock()
+	defer md.userInfoLock.RUnlock()
+	return md.userInfo
+}
+
+func (md *MDServerRemote) setUserInfo(
+	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	md.log.CDebugf(ctx, "Setting user info to %s", userInfo)
+	func() {
+		md.userInfoLock.Lock()
+		defer md.userInfoLock.Unlock()
+		md.userInfo = userInfo
+	}()
+
+	if _, err := md.resetAuth(ctx, md.client); err != nil {
+		md.log.CDebugf(ctx, "error refreshing auth token: %+v", err)
+	}
+}
+
 // resetAuth is called to reset the authorization on an MDServer
 // connection.
 func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClient) (int, error) {
 
-	md.log.Debug("MDServerRemote: resetAuth called")
+	md.log.CDebugf(ctx, "MDServerRemote: resetAuth called")
 
 	isAuthenticated := false
 	defer func() {
@@ -166,35 +190,34 @@ func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClie
 		md.authenticatedMtx.Unlock()
 	}()
 
-	session, err := md.config.KBPKI().GetCurrentSession(ctx)
-	if err != nil {
-		md.log.Debug("MDServerRemote: User logged out, skipping resetAuth")
+	userInfo := md.getUserInfo()
+	if userInfo == (kbfscrypto.AuthUserInfo{}) {
+		md.log.CDebugf(ctx, "MDServerRemote: User logged out, skipping resetAuth")
 		return MdServerDefaultPingIntervalSeconds, NoCurrentSessionError{}
 	}
 
 	challenge, err := c.GetChallenge(ctx)
 	if err != nil {
-		md.log.Warning("MDServerRemote: challenge request error: %v", err)
+		md.log.CWarningf(ctx, "MDServerRemote: challenge request error: %v", err)
 		return 0, err
 	}
 	md.log.Debug("MDServerRemote: received challenge")
 
 	// get a new signature
-	signature, err := md.authToken.Sign(ctx, kbfscrypto.AuthUserInfo{
-		session.Name, session.UID, session.VerifyingKey}, challenge)
+	signature, err := md.authToken.Sign(ctx, userInfo, challenge)
 	if err != nil {
-		md.log.Warning("MDServerRemote: error signing authentication token: %v", err)
+		md.log.CWarningf(ctx, "MDServerRemote: error signing authentication token: %v", err)
 		return 0, err
 	}
-	md.log.Debug("MDServerRemote: authentication token signed")
+	md.log.CDebugf(ctx, "MDServerRemote: authentication token signed")
 
 	// authenticate
 	pingIntervalSeconds, err := c.Authenticate(ctx, signature)
 	if err != nil {
-		md.log.Warning("MDServerRemote: authentication error: %v", err)
+		md.log.CWarningf(ctx, "MDServerRemote: authentication error: %v", err)
 		return 0, err
 	}
-	md.log.Debug("MDServerRemote: authentication successful; ping interval: %ds", pingIntervalSeconds)
+	md.log.CDebugf(ctx, "MDServerRemote: authentication successful; ping interval: %ds", pingIntervalSeconds)
 
 	isAuthenticated = true
 
@@ -213,6 +236,17 @@ func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClie
 	md.authenticatedMtx.Unlock()
 
 	return pingIntervalSeconds, nil
+}
+
+// OnLogin implements the MDServer interface for MDServerRemote.
+func (b *MDServerRemote) OnLogin(
+	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	b.setUserInfo(ctx, userInfo)
+}
+
+// OnLogout implements the MDServer interface for MDServerRemote.
+func (b *MDServerRemote) OnLogout(ctx context.Context) {
+	b.setUserInfo(ctx, kbfscrypto.AuthUserInfo{})
 }
 
 // RefreshAuthToken implements the AuthTokenRefreshHandler interface.
