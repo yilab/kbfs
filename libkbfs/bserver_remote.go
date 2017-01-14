@@ -41,7 +41,8 @@ type BlockServerRemote struct {
 	blkSrvAddr string
 
 	userInfoLock sync.RWMutex
-	userInfo     *kbfscrypto.AuthUserInfo
+	// userInfo is nil when there is no logged-in user.
+	userInfo *kbfscrypto.AuthUserInfo
 
 	putAuthToken *kbfscrypto.AuthToken
 	getAuthToken *kbfscrypto.AuthToken
