@@ -55,6 +55,8 @@ type SessionInfo struct {
 	VerifyingKey   kbfscrypto.VerifyingKey
 }
 
+// ToAuthUserInfo converts this SessionInfo into a
+// kbfscrypto.AuthUserInfo.
 func (s SessionInfo) ToAuthUserInfo() kbfscrypto.AuthUserInfo {
 	return kbfscrypto.AuthUserInfo{
 		Name:         s.Name,
