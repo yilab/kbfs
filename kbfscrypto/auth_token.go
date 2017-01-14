@@ -53,12 +53,20 @@ func NewAuthToken(signer Signer, tokenType string, expireIn int,
 	return authToken
 }
 
+// UserAuthInfo contains all the info necessary to sign an auth
+// challenge.
+type UserAuthInfo struct {
+	Name         libkb.NormalizedUsername
+	UID          keybase1.UID
+	VerifyingKey VerifyingKey
+}
+
 // Sign is called to create a new signed authentication token.
-func (a *AuthToken) signWithUserAndKeyInfo(ctx context.Context,
-	challengeInfo keybase1.ChallengeInfo, uid keybase1.UID,
-	username libkb.NormalizedUsername, key VerifyingKey) (string, error) {
+func (a *AuthToken) sign(ctx context.Context, userInfo UserAuthInfo,
+	challengeInfo keybase1.ChallengeInfo) (string, error) {
 	// create the token
-	token := auth.NewToken(uid, username, key.KID(), a.tokenType,
+	token := auth.NewToken(userInfo.UID, userInfo.Name,
+		userInfo.VerifyingKey.KID(), a.tokenType,
 		challengeInfo.Challenge, challengeInfo.Now, a.expireIn,
 		a.clientName, a.clientVersion)
 
@@ -80,31 +88,27 @@ func (a *AuthToken) signWithUserAndKeyInfo(ctx context.Context,
 
 // Sign is called to create a new signed authentication token,
 // including a challenge and username/uid/kid identifiers.
-func (a *AuthToken) Sign(ctx context.Context,
-	currentUsername libkb.NormalizedUsername, currentUID keybase1.UID,
-	currentVerifyingKey VerifyingKey,
+func (a *AuthToken) Sign(ctx context.Context, userInfo UserAuthInfo,
 	challengeInfo keybase1.ChallengeInfo) (string, error) {
 	// make sure we're being asked to sign a legit challenge
 	if !auth.IsValidChallenge(challengeInfo.Challenge) {
 		return "", errors.New("Invalid challenge")
 	}
 
-	return a.signWithUserAndKeyInfo(
-		ctx, challengeInfo, currentUID,
-		currentUsername, currentVerifyingKey)
+	return a.sign(ctx, userInfo, challengeInfo)
 }
 
 // SignUserless signs the token without a username, UID, or challenge.
 // This is useful for server-to-server communication where identity is
 // established using only the KID.  Assume the client and server
 // clocks are roughly synchronized.
-func (a *AuthToken) SignUserless(
-	ctx context.Context, key VerifyingKey) (
+func (a *AuthToken) SignUserless(ctx context.Context, key VerifyingKey) (
 	string, error) {
 	// Pass in a reserved, meaningless UID.
-	return a.signWithUserAndKeyInfo(ctx,
-		keybase1.ChallengeInfo{Now: time.Now().Unix()},
-		keybase1.PublicUID, "", key)
+	return a.sign(ctx, UserAuthInfo{
+		UID:          keybase1.PublicUID,
+		VerifyingKey: key,
+	}, keybase1.ChallengeInfo{Now: time.Now().Unix()})
 }
 
 // Shutdown is called to stop the refresh ticker.
