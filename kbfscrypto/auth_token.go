@@ -53,16 +53,16 @@ func NewAuthToken(signer Signer, tokenType string, expireIn int,
 	return authToken
 }
 
-// UserAuthInfo contains all the info necessary to sign an auth
+// AuthUserInfo contains all the info necessary to sign an auth
 // challenge.
-type UserAuthInfo struct {
+type AuthUserInfo struct {
 	Name         libkb.NormalizedUsername
 	UID          keybase1.UID
 	VerifyingKey VerifyingKey
 }
 
 // Sign is called to create a new signed authentication token.
-func (a *AuthToken) sign(ctx context.Context, userInfo UserAuthInfo,
+func (a *AuthToken) sign(ctx context.Context, userInfo AuthUserInfo,
 	challengeInfo keybase1.ChallengeInfo) (string, error) {
 	// create the token
 	token := auth.NewToken(userInfo.UID, userInfo.Name,
@@ -88,7 +88,7 @@ func (a *AuthToken) sign(ctx context.Context, userInfo UserAuthInfo,
 
 // Sign is called to create a new signed authentication token,
 // including a challenge and username/uid/kid identifiers.
-func (a *AuthToken) Sign(ctx context.Context, userInfo UserAuthInfo,
+func (a *AuthToken) Sign(ctx context.Context, userInfo AuthUserInfo,
 	challengeInfo keybase1.ChallengeInfo) (string, error) {
 	// make sure we're being asked to sign a legit challenge
 	if !auth.IsValidChallenge(challengeInfo.Challenge) {
@@ -105,7 +105,7 @@ func (a *AuthToken) Sign(ctx context.Context, userInfo UserAuthInfo,
 func (a *AuthToken) SignUserless(ctx context.Context, key VerifyingKey) (
 	string, error) {
 	// Pass in a reserved, meaningless UID.
-	return a.sign(ctx, UserAuthInfo{
+	return a.sign(ctx, AuthUserInfo{
 		UID:          keybase1.PublicUID,
 		VerifyingKey: key,
 	}, keybase1.ChallengeInfo{Now: time.Now().Unix()})
