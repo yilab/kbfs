@@ -3240,12 +3240,20 @@ func (_m *MockBlockServer) EXPECT() *_MockBlockServerRecorder {
 	return _m.recorder
 }
 
-func (_m *MockBlockServer) RefreshAuthToken(_param0 context.Context) {
-	_m.ctrl.Call(_m, "RefreshAuthToken", _param0)
+func (_m *MockBlockServer) OnLogin(ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	_m.ctrl.Call(_m, "OnLogin", ctx, userInfo)
 }
 
-func (_mr *_MockBlockServerRecorder) RefreshAuthToken(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "RefreshAuthToken", arg0)
+func (_mr *_MockBlockServerRecorder) OnLogin(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "OnLogin", arg0, arg1)
+}
+
+func (_m *MockBlockServer) OnLogout(ctx context.Context) {
+	_m.ctrl.Call(_m, "OnLogout", ctx)
+}
+
+func (_mr *_MockBlockServerRecorder) OnLogout(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "OnLogout", arg0)
 }
 
 func (_m *MockBlockServer) Get(ctx context.Context, tlfID tlf.ID, id kbfsblock.ID, context kbfsblock.Context) ([]byte, kbfscrypto.BlockCryptKeyServerHalf, error) {
@@ -3352,12 +3360,20 @@ func (_m *MockblockServerLocal) EXPECT() *_MockblockServerLocalRecorder {
 	return _m.recorder
 }
 
-func (_m *MockblockServerLocal) RefreshAuthToken(_param0 context.Context) {
-	_m.ctrl.Call(_m, "RefreshAuthToken", _param0)
+func (_m *MockblockServerLocal) OnLogin(ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	_m.ctrl.Call(_m, "OnLogin", ctx, userInfo)
 }
 
-func (_mr *_MockblockServerLocalRecorder) RefreshAuthToken(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "RefreshAuthToken", arg0)
+func (_mr *_MockblockServerLocalRecorder) OnLogin(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "OnLogin", arg0, arg1)
+}
+
+func (_m *MockblockServerLocal) OnLogout(ctx context.Context) {
+	_m.ctrl.Call(_m, "OnLogout", ctx)
+}
+
+func (_mr *_MockblockServerLocalRecorder) OnLogout(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "OnLogout", arg0)
 }
 
 func (_m *MockblockServerLocal) Get(ctx context.Context, tlfID tlf.ID, id kbfsblock.ID, context kbfsblock.Context) ([]byte, kbfscrypto.BlockCryptKeyServerHalf, error) {
