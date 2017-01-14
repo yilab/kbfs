@@ -32,7 +32,6 @@ const (
 // represents a remote KBFS block server.
 type BlockServerRemote struct {
 	codec      kbfscodec.Codec
-	csg        currentSessionGetter
 	shutdownFn func()
 	putClient  keybase1.BlockInterface
 	getClient  keybase1.BlockInterface
@@ -208,8 +207,7 @@ func NewBlockServerRemote(codec kbfscodec.Codec, signer kbfscrypto.Signer,
 
 // For testing.
 func newBlockServerRemoteWithClient(codec kbfscodec.Codec,
-	csg currentSessionGetter, log logger.Logger,
-	client keybase1.BlockInterface) *BlockServerRemote {
+	log logger.Logger, client keybase1.BlockInterface) *BlockServerRemote {
 	deferLog := log.CloneWithAddedDepth(1)
 	bs := &BlockServerRemote{
 		codec:     codec,
@@ -225,22 +223,6 @@ func newBlockServerRemoteWithClient(codec kbfscodec.Codec,
 func (b *BlockServerRemote) RemoteAddress() string {
 	return b.blkSrvAddr
 }
-func (b *BlockServerRemote) updateUserInfo(ctx context.Context) {
-	session, err := b.csg.GetCurrentSession(ctx)
-	if err != nil {
-		// TODO: Detect logout specifically.
-		b.userInfoLock.Lock()
-		defer b.userInfoLock.Unlock()
-		b.userInfo = nil
-		return
-	}
-
-	b.userInfoLock.Lock()
-	defer b.userInfoLock.Unlock()
-	userInfo := session.ToAuthUserInfo()
-	b.userInfo = &userInfo
-}
-
 func (b *BlockServerRemote) getUserInfo() *kbfscrypto.AuthUserInfo {
 	b.userInfoLock.RLock()
 	defer b.userInfoLock.RUnlock()
