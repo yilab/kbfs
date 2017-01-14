@@ -198,7 +198,7 @@ func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClie
 
 	challenge, err := c.GetChallenge(ctx)
 	if err != nil {
-		md.log.CWarningf(ctx, "MDServerRemote: challenge request error: %v", err)
+		md.log.CWarningf(ctx, "MDServerRemote: challenge request error: %+v", err)
 		return 0, err
 	}
 	md.log.Debug("MDServerRemote: received challenge")
@@ -206,7 +206,7 @@ func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClie
 	// get a new signature
 	signature, err := md.authToken.Sign(ctx, userInfo, challenge)
 	if err != nil {
-		md.log.CWarningf(ctx, "MDServerRemote: error signing authentication token: %v", err)
+		md.log.CWarningf(ctx, "MDServerRemote: error signing authentication token: %+v", err)
 		return 0, err
 	}
 	md.log.CDebugf(ctx, "MDServerRemote: authentication token signed")
@@ -214,7 +214,7 @@ func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClie
 	// authenticate
 	pingIntervalSeconds, err := c.Authenticate(ctx, signature)
 	if err != nil {
-		md.log.CWarningf(ctx, "MDServerRemote: authentication error: %v", err)
+		md.log.CWarningf(ctx, "MDServerRemote: authentication error: %+v", err)
 		return 0, err
 	}
 	md.log.CDebugf(ctx, "MDServerRemote: authentication successful; ping interval: %ds", pingIntervalSeconds)
@@ -226,7 +226,7 @@ func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClie
 		defer func() {
 			// request a list of folders needing rekey action
 			if err := md.getFoldersForRekey(ctx, c); err != nil {
-				md.log.Warning("MDServerRemote: getFoldersForRekey failed with %v", err)
+				md.log.Warning("MDServerRemote: getFoldersForRekey failed with %+v", err)
 			}
 			md.log.Debug("MDServerRemote: requested list of folders for rekey")
 		}()
@@ -260,7 +260,7 @@ func (md *MDServerRemote) RefreshAuthToken(ctx context.Context) {
 	case NoCurrentSessionError:
 		md.log.Debug("MDServerRemote: no session available, connection remains anonymous")
 	default:
-		md.log.Debug("MDServerRemote: error refreshing auth token: %v", err)
+		md.log.Debug("MDServerRemote: error refreshing auth token: %+v", err)
 	}
 }
 
@@ -734,7 +734,7 @@ func (md *MDServerRemote) CheckForRekeys(ctx context.Context) <-chan error {
 		}
 		if err := md.getFoldersForRekey(ctx, md.client); err != nil {
 			md.log.CDebugf(ctx, "getFoldersForRekey failed during "+
-				"CheckForRekeys: %v", err)
+				"CheckForRekeys: %+v", err)
 			c <- err
 		}
 		md.rekeyTimer.Reset(MdServerBackgroundRekeyPeriod)
@@ -899,7 +899,7 @@ func (md *MDServerRemote) backgroundRekeyChecker(ctx context.Context) {
 			md.log.CDebugf(newCtx, "Checking for rekey folders")
 			if err := md.getFoldersForRekey(newCtx, md.client); err != nil {
 				md.log.CWarningf(newCtx, "MDServerRemote: getFoldersForRekey "+
-					"failed with %v", err)
+					"failed with %+v", err)
 			}
 			md.rekeyTimer.Reset(MdServerBackgroundRekeyPeriod)
 		case <-ctx.Done():
