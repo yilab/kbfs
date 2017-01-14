@@ -241,30 +241,21 @@ func ConfigAsUser(config *ConfigLocal, loggedInUser libkb.NormalizedUsername) *C
 	c.SetCrypto(crypto)
 	c.noBGFlush = config.noBGFlush
 
-	var userInfo kbfscrypto.AuthUserInfo
-	var initializedUserInfo bool
-	getUserInfo := func() kbfscrypto.AuthUserInfo {
-		if initializedUserInfo {
-			return userInfo
-		}
-
-		session, err := config.KBPKI().GetCurrentSession(context.Background())
-		switch err.(type) {
-		case NoCurrentSessionError:
-			// Continue.
-		case nil:
-			// Continue.
-		default:
-			panic(err)
-		}
-		userInfo = session.ToAuthUserInfo()
-		return userInfo
+	session, err := config.KBPKI().GetCurrentSession(context.Background())
+	switch err.(type) {
+	case NoCurrentSessionError:
+		// Continue.
+	case nil:
+		// Continue.
+	default:
+		panic(err)
 	}
+	userInfo := session.ToAuthUserInfo()
 
 	if s, ok := config.BlockServer().(*BlockServerRemote); ok {
 		bserverLog := config.MakeLogger("BSR")
 		blockServer := NewBlockServerRemote(c.Codec(), c.Crypto(),
-			getUserInfo(), bserverLog, s.RemoteAddress(),
+			userInfo, bserverLog, s.RemoteAddress(),
 			env.NewContext().NewRPCLogFactory())
 		c.SetBlockServer(blockServer)
 	} else {
@@ -281,7 +272,7 @@ func ConfigAsUser(config *ConfigLocal, loggedInUser libkb.NormalizedUsername) *C
 	var keyServer KeyServer
 	if s, ok := config.MDServer().(*MDServerRemote); ok {
 		// connect to server
-		mdServer = NewMDServerRemote(c, getUserInfo(), s.RemoteAddress(), env.NewContext().NewRPCLogFactory())
+		mdServer = NewMDServerRemote(c, userInfo, s.RemoteAddress(), env.NewContext().NewRPCLogFactory())
 		// for now the MD server also acts as the key server.
 		keyServer = mdServer.(*MDServerRemote)
 	} else {
