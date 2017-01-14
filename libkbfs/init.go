@@ -5,6 +5,7 @@
 package libkbfs
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -296,10 +297,18 @@ func makeBlockServer(config Config, bserverAddr string,
 			bserverLog, blockPath), nil
 	}
 
+	session, err := config.KBPKI().GetCurrentSession(context.Background())
+	if err != nil {
+		// TODO: Check for non-existent session.
+		return nil, err
+	}
+
 	log.Debug("Using remote bserver %s", bserverAddr)
 	bserverLog := config.MakeLogger("BSR")
+	authUserInfo := session.ToAuthUserInfo()
 	return NewBlockServerRemote(config.Codec(), config.Crypto(),
-		config.KBPKI(), bserverLog, bserverAddr, rpcLogFactory), nil
+		&authUserInfo, bserverLog, bserverAddr,
+		rpcLogFactory), nil
 }
 
 // InitLog sets up logging switching to a log file if necessary.

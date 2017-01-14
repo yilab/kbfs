@@ -55,6 +55,14 @@ type SessionInfo struct {
 	VerifyingKey   kbfscrypto.VerifyingKey
 }
 
+func (s SessionInfo) ToAuthUserInfo() kbfscrypto.AuthUserInfo {
+	return kbfscrypto.AuthUserInfo{
+		Name:         s.Name,
+		UID:          s.UID,
+		VerifyingKey: s.VerifyingKey,
+	}
+}
+
 // EncryptionVer denotes a version for the encryption method.
 type EncryptionVer int
 

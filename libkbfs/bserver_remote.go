@@ -142,12 +142,12 @@ var _ rpc.ConnectionHandler = (*blockServerRemoteClientHandler)(nil)
 // NewBlockServerRemote constructs a new BlockServerRemote for the
 // given address.
 func NewBlockServerRemote(codec kbfscodec.Codec, signer kbfscrypto.Signer,
-	csg currentSessionGetter, log logger.Logger, blkSrvAddr string,
+	userInfo *kbfscrypto.AuthUserInfo, log logger.Logger, blkSrvAddr string,
 	rpcLogFactory *libkb.RPCLogFactory) *BlockServerRemote {
 	deferLog := log.CloneWithAddedDepth(1)
 	bs := &BlockServerRemote{
 		codec:      codec,
-		csg:        csg,
+		userInfo:   userInfo,
 		log:        log,
 		deferLog:   deferLog,
 		blkSrvAddr: blkSrvAddr,
@@ -212,7 +212,6 @@ func newBlockServerRemoteWithClient(codec kbfscodec.Codec,
 	deferLog := log.CloneWithAddedDepth(1)
 	bs := &BlockServerRemote{
 		codec:     codec,
-		csg:       csg,
 		putClient: client,
 		getClient: client,
 		log:       log,
@@ -237,11 +236,14 @@ func (b *BlockServerRemote) updateUserInfo(ctx context.Context) {
 
 	b.userInfoLock.Lock()
 	defer b.userInfoLock.Unlock()
-	b.userInfo = &kbfscrypto.AuthUserInfo{
-		Name:         session.Name,
-		UID:          session.UID,
-		VerifyingKey: session.VerifyingKey,
-	}
+	userInfo := session.ToAuthUserInfo()
+	b.userInfo = &userInfo
+}
+
+func (b *BlockServerRemote) getUserInfo() *kbfscrypto.AuthUserInfo {
+	b.userInfoLock.RLock()
+	defer b.userInfoLock.RUnlock()
+	return b.userInfo
 }
 
 // resetAuth is called to reset the authorization on a BlockServer
@@ -256,11 +258,7 @@ func (b *BlockServerRemote) resetAuth(
 
 	b.updateUserInfo(ctx)
 
-	userInfo := func() *kbfscrypto.AuthUserInfo {
-		b.userInfoLock.RLock()
-		defer b.userInfoLock.RUnlock()
-		return b.userInfo
-	}()
+	userInfo := b.getUserInfo()
 	if userInfo == nil {
 		b.log.Debug("BlockServerRemote: User logged out, skipping resetAuth")
 		return
