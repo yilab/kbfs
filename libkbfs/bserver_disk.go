@@ -364,8 +364,11 @@ func (b *BlockServerDisk) Shutdown() {
 	}
 }
 
-// RefreshAuthToken implements the BlockServer interface for BlockServerDisk.
-func (b *BlockServerDisk) RefreshAuthToken(_ context.Context) {}
+func (b *BlockServerDisk) OnLogin(
+	_ context.Context, _ kbfscrypto.AuthUserInfo) {
+}
+
+func (b *BlockServerDisk) OnLogout(_ context.Context) {}
 
 // GetUserQuotaInfo implements the BlockServer interface for BlockServerDisk.
 func (b *BlockServerDisk) GetUserQuotaInfo(ctx context.Context) (info *kbfsblock.UserQuotaInfo, err error) {

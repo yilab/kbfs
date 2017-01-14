@@ -114,10 +114,13 @@ func (b BlockServerMeasured) Shutdown() {
 	b.delegate.Shutdown()
 }
 
-// RefreshAuthToken implements the BlockServer interface for
-// BlockServerMeasured.
-func (b BlockServerMeasured) RefreshAuthToken(ctx context.Context) {
-	b.delegate.RefreshAuthToken(ctx)
+func (b BlockServerMeasured) OnLogin(
+	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	b.delegate.OnLogin(ctx, userInfo)
+}
+
+func (b BlockServerMeasured) OnLogout(ctx context.Context) {
+	b.delegate.OnLogout(ctx)
 }
 
 // GetUserQuotaInfo implements the BlockServer interface for BlockServerMeasured

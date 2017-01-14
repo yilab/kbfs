@@ -4,7 +4,10 @@
 
 package libkbfs
 
-import "golang.org/x/net/context"
+import (
+	"github.com/keybase/kbfs/kbfscrypto"
+	"golang.org/x/net/context"
+)
 
 // serviceLoggedIn should be called when a new user logs in. It
 // shouldn't be called again until after serviceLoggedOut is called.
@@ -30,7 +33,8 @@ func serviceLoggedIn(ctx context.Context, config Config, name string,
 	}
 
 	config.MDServer().RefreshAuthToken(ctx)
-	config.BlockServer().RefreshAuthToken(ctx)
+	// TODO: Fill in.
+	config.BlockServer().OnLogin(ctx, kbfscrypto.AuthUserInfo{})
 	config.KBFSOps().RefreshCachedFavorites(ctx)
 	config.KBFSOps().PushStatusChange()
 }
@@ -42,7 +46,7 @@ func serviceLoggedOut(ctx context.Context, config Config) {
 	}
 	config.ResetCaches()
 	config.MDServer().RefreshAuthToken(ctx)
-	config.BlockServer().RefreshAuthToken(ctx)
+	config.BlockServer().OnLogout(ctx)
 	config.KBFSOps().RefreshCachedFavorites(ctx)
 	config.KBFSOps().PushStatusChange()
 }

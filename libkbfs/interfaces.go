@@ -1181,7 +1181,8 @@ type mdServerLocal interface {
 // put/delete, the server is reponsible for: 1) checking that the ID
 // matches the hash of the buffer; and 2) enforcing writer quotas.
 type BlockServer interface {
-	authTokenRefreshHandler
+	OnLogin(ctx context.Context, userInfo kbfscrypto.AuthUserInfo)
+	OnLogout(ctx context.Context)
 
 	// Get gets the (encrypted) block data associated with the given
 	// block ID and context, uses the provided block key to decrypt

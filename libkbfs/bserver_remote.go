@@ -281,8 +281,21 @@ func (b *BlockServerRemote) resetAuth(
 	return c.AuthenticateSession(ctx, signature)
 }
 
-// RefreshAuthToken implements the AuthTokenRefreshHandler interface.
-func (b *BlockServerRemote) RefreshAuthToken(ctx context.Context) {
+func (b *BlockServerRemote) OnLogin(
+	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	b.updateUserInfo(ctx)
+
+	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
+		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
+	}
+	if err := b.resetAuth(ctx, b.getClient, b.getAuthToken); err != nil {
+		b.log.CDebugf(ctx, "error refreshing get auth token: %v", err)
+	}
+}
+
+func (b *BlockServerRemote) OnLogout(ctx context.Context) {
+	b.updateUserInfo(ctx)
+
 	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
 		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
 	}

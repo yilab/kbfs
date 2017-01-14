@@ -360,8 +360,11 @@ func (b *BlockServerMemory) Shutdown() {
 	b.m = nil
 }
 
-// RefreshAuthToken implements the BlockServer interface for BlockServerMemory.
-func (b *BlockServerMemory) RefreshAuthToken(_ context.Context) {}
+func (b *BlockServerMemory) OnLogin(
+	_ context.Context, _ kbfscrypto.AuthUserInfo) {
+}
+
+func (b *BlockServerMemory) OnLogout(_ context.Context) {}
 
 // GetUserQuotaInfo implements the BlockServer interface for BlockServerMemory.
 func (b *BlockServerMemory) GetUserQuotaInfo(ctx context.Context) (info *kbfsblock.UserQuotaInfo, err error) {
