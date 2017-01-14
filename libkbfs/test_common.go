@@ -118,28 +118,19 @@ func MakeTestConfigOrBust(t logger.TestLogBackend,
 	crypto := NewCryptoLocal(config.Codec(), signingKey, cryptPrivateKey)
 	config.SetCrypto(crypto)
 
-	var userInfo kbfscrypto.AuthUserInfo
-	var initializedUserInfo bool
-	getUserInfo := func() kbfscrypto.AuthUserInfo {
-		if initializedUserInfo {
-			return userInfo
-		}
-
-		session, err := config.KBPKI().GetCurrentSession(context.Background())
-		switch err.(type) {
-		case NoCurrentSessionError:
-			// Continue.
-		case nil:
-			// Continue.
-		default:
-			t.Fatal(err)
-		}
-		userInfo = session.ToAuthUserInfo()
-		return userInfo
+	session, err := config.KBPKI().GetCurrentSession(context.Background())
+	switch err.(type) {
+	case NoCurrentSessionError:
+		// Continue.
+	case nil:
+		// Continue.
+	default:
+		t.Fatal(err)
 	}
+	userInfo := session.ToAuthUserInfo()
 
 	blockServer := MakeTestBlockServerOrBust(
-		t, config.Codec(), config.Crypto(), getUserInfo,
+		t, config.Codec(), config.Crypto(), func() kbfscrypto.AuthUserInfo { return userInfo },
 		env.NewContext().NewRPCLogFactory(), log)
 	config.SetBlockServer(blockServer)
 
@@ -177,7 +168,7 @@ func MakeTestConfigOrBust(t logger.TestLogBackend,
 		libkb.G.ConfigureLogging()
 
 		// connect to server
-		mdServer = NewMDServerRemote(config, getUserInfo(), mdServerAddr, env.NewContext().NewRPCLogFactory())
+		mdServer = NewMDServerRemote(config, userInfo, mdServerAddr, env.NewContext().NewRPCLogFactory())
 		// for now the MD server acts as the key server in production
 		keyServer = mdServer.(*MDServerRemote)
 
