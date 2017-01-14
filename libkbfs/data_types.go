@@ -56,6 +56,7 @@ type SessionInfo struct {
 }
 
 // ToAuthUserInfo converts this SessionInfo into a
+// kbfscrypto.AuthUserInfo. A zero SessionInfo converts to a zero
 // kbfscrypto.AuthUserInfo.
 func (s SessionInfo) ToAuthUserInfo() kbfscrypto.AuthUserInfo {
 	return kbfscrypto.AuthUserInfo{

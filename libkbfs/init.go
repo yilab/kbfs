@@ -18,7 +18,6 @@ import (
 
 	"github.com/keybase/client/go/libkb"
 	"github.com/keybase/client/go/logger"
-	"github.com/keybase/kbfs/kbfscrypto"
 )
 
 // InitParams contains the initialization parameters for Init(). It is
@@ -298,19 +297,21 @@ func makeBlockServer(config Config, bserverAddr string,
 			bserverLog, blockPath), nil
 	}
 
-	var userInfo kbfscrypto.AuthUserInfo
 	session, err := config.KBPKI().GetCurrentSession(context.Background())
-	if _, ok := err.(NoCurrentSessionError); ok {
-	} else if err != nil {
+	switch err.(type) {
+	case NoCurrentSessionError:
+		// Continue.
+	case nil:
+		// Continue.
+	default:
 		return nil, err
-	} else {
-		userInfo = session.ToAuthUserInfo()
 	}
 
 	log.Debug("Using remote bserver %s", bserverAddr)
 	bserverLog := config.MakeLogger("BSR")
 	return NewBlockServerRemote(config.Codec(), config.Crypto(),
-		userInfo, bserverLog, bserverAddr, rpcLogFactory), nil
+		session.ToAuthUserInfo(), bserverLog, bserverAddr,
+		rpcLogFactory), nil
 }
 
 // InitLog sets up logging switching to a log file if necessary.

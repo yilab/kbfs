@@ -408,7 +408,9 @@ type normalizedUsernameGetter interface {
 }
 
 type currentSessionGetter interface {
-	// GetCurrentSession gets the current session info.
+	// GetCurrentSession gets the current session info. If there
+	// is no current session (i.e., no logged-in user),
+	// SessionInfo{}, NoCurrentSessionError{} is returned.
 	GetCurrentSession(ctx context.Context) (SessionInfo, error)
 }
 
