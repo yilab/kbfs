@@ -229,10 +229,20 @@ func (b *BlockServerRemote) getUserInfo() kbfscrypto.AuthUserInfo {
 	return b.userInfo
 }
 
-func (b *BlockServerRemote) setUserInfo(userInfo kbfscrypto.AuthUserInfo) {
-	b.userInfoLock.Lock()
-	defer b.userInfoLock.Unlock()
-	b.userInfo = userInfo
+func (b *BlockServerRemote) setUserInfo(
+	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	func() {
+		b.userInfoLock.Lock()
+		defer b.userInfoLock.Unlock()
+		b.userInfo = userInfo
+	}()
+
+	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
+		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
+	}
+	if err := b.resetAuth(ctx, b.getClient, b.getAuthToken); err != nil {
+		b.log.CDebugf(ctx, "error refreshing get auth token: %v", err)
+	}
 }
 
 // resetAuth is called to reset the authorization on a BlockServer
@@ -269,26 +279,12 @@ func (b *BlockServerRemote) resetAuth(
 // OnLogin implements the BlockServer interface for BlockServerRemote.
 func (b *BlockServerRemote) OnLogin(
 	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
-	b.setUserInfo(userInfo)
-
-	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
-		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
-	}
-	if err := b.resetAuth(ctx, b.getClient, b.getAuthToken); err != nil {
-		b.log.CDebugf(ctx, "error refreshing get auth token: %v", err)
-	}
+	b.setUserInfo(ctx, userInfo)
 }
 
 // OnLogout implements the BlockServer interface for BlockServerRemote.
 func (b *BlockServerRemote) OnLogout(ctx context.Context) {
-	b.setUserInfo(kbfscrypto.AuthUserInfo{})
-
-	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
-		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
-	}
-	if err := b.resetAuth(ctx, b.getClient, b.getAuthToken); err != nil {
-		b.log.CDebugf(ctx, "error refreshing get auth token: %v", err)
-	}
+	b.setUserInfo(ctx, kbfscrypto.AuthUserInfo{})
 }
 
 func makeBlockIDCombo(id kbfsblock.ID, context kbfsblock.Context) keybase1.BlockIdCombo {
