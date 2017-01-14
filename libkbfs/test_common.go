@@ -119,8 +119,12 @@ func MakeTestConfigOrBust(t logger.TestLogBackend,
 	config.SetCrypto(crypto)
 
 	session, err := config.KBPKI().GetCurrentSession(context.Background())
-	if err != nil {
-		// TODO: Check for non-existent session.
+	switch err.(type) {
+	case NoCurrentSessionError:
+		// Continue.
+	case nil:
+		// Continue.
+	default:
 		t.Fatal(err)
 	}
 
