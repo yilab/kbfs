@@ -298,14 +298,13 @@ func makeBlockServer(config Config, bserverAddr string,
 			bserverLog, blockPath), nil
 	}
 
-	var userInfo *kbfscrypto.AuthUserInfo
+	var userInfo kbfscrypto.AuthUserInfo
 	session, err := config.KBPKI().GetCurrentSession(context.Background())
 	if _, ok := err.(NoCurrentSessionError); ok {
 	} else if err != nil {
 		return nil, err
 	} else {
-		authUserInfo := session.ToAuthUserInfo()
-		userInfo = &authUserInfo
+		userInfo = session.ToAuthUserInfo()
 	}
 
 	log.Debug("Using remote bserver %s", bserverAddr)

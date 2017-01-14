@@ -65,7 +65,7 @@ func newConfigForTest(loggerFn func(module string) logger.Logger) *ConfigLocal {
 // MakeTestBlockServerOrBust makes a block server from the given
 // arguments and environment variables.
 func MakeTestBlockServerOrBust(t logger.TestLogBackend, codec kbfscodec.Codec,
-	signer kbfscrypto.Signer, userInfo *kbfscrypto.AuthUserInfo,
+	signer kbfscrypto.Signer, userInfo kbfscrypto.AuthUserInfo,
 	rpcLogFactory *libkb.RPCLogFactory, log logger.Logger) BlockServer {
 	// see if a local remote server is specified
 	bserverAddr := os.Getenv(EnvTestBServerAddr)
@@ -124,9 +124,8 @@ func MakeTestConfigOrBust(t logger.TestLogBackend,
 		t.Fatal(err)
 	}
 
-	userInfo := session.ToAuthUserInfo()
 	blockServer := MakeTestBlockServerOrBust(t, config.Codec(),
-		config.Crypto(), &userInfo,
+		config.Crypto(), session.ToAuthUserInfo(),
 		env.NewContext().NewRPCLogFactory(), log)
 	config.SetBlockServer(blockServer)
 

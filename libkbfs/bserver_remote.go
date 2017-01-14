@@ -40,8 +40,8 @@ type BlockServerRemote struct {
 	blkSrvAddr string
 
 	userInfoLock sync.RWMutex
-	// userInfo is nil when there is no logged-in user.
-	userInfo *kbfscrypto.AuthUserInfo
+	// userInfo is the zero value when there is no logged-in user.
+	userInfo kbfscrypto.AuthUserInfo
 
 	putAuthToken *kbfscrypto.AuthToken
 	getAuthToken *kbfscrypto.AuthToken
@@ -142,7 +142,7 @@ var _ rpc.ConnectionHandler = (*blockServerRemoteClientHandler)(nil)
 // NewBlockServerRemote constructs a new BlockServerRemote for the
 // given address.
 func NewBlockServerRemote(codec kbfscodec.Codec, signer kbfscrypto.Signer,
-	userInfo *kbfscrypto.AuthUserInfo, log logger.Logger, blkSrvAddr string,
+	userInfo kbfscrypto.AuthUserInfo, log logger.Logger, blkSrvAddr string,
 	rpcLogFactory *libkb.RPCLogFactory) *BlockServerRemote {
 	deferLog := log.CloneWithAddedDepth(1)
 	bs := &BlockServerRemote{
@@ -223,13 +223,13 @@ func newBlockServerRemoteWithClient(codec kbfscodec.Codec,
 func (b *BlockServerRemote) RemoteAddress() string {
 	return b.blkSrvAddr
 }
-func (b *BlockServerRemote) getUserInfo() *kbfscrypto.AuthUserInfo {
+func (b *BlockServerRemote) getUserInfo() kbfscrypto.AuthUserInfo {
 	b.userInfoLock.RLock()
 	defer b.userInfoLock.RUnlock()
 	return b.userInfo
 }
 
-func (b *BlockServerRemote) setUserInfo(userInfo *kbfscrypto.AuthUserInfo) {
+func (b *BlockServerRemote) setUserInfo(userInfo kbfscrypto.AuthUserInfo) {
 	b.userInfoLock.Lock()
 	defer b.userInfoLock.Unlock()
 	b.userInfo = userInfo
@@ -246,7 +246,7 @@ func (b *BlockServerRemote) resetAuth(
 	}()
 
 	userInfo := b.getUserInfo()
-	if userInfo == nil {
+	if userInfo == (kbfscrypto.AuthUserInfo{}) {
 		b.log.Debug("BlockServerRemote: User logged out, skipping resetAuth")
 		return
 	}
@@ -258,7 +258,7 @@ func (b *BlockServerRemote) resetAuth(
 	}
 
 	// get a new signature
-	signature, err := authToken.Sign(ctx, *userInfo, challenge)
+	signature, err := authToken.Sign(ctx, userInfo, challenge)
 	if err != nil {
 		return err
 	}
@@ -269,7 +269,7 @@ func (b *BlockServerRemote) resetAuth(
 // OnLogin implements the BlockServer interface for BlockServerRemote.
 func (b *BlockServerRemote) OnLogin(
 	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
-	b.setUserInfo(&userInfo)
+	b.setUserInfo(userInfo)
 
 	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
 		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
@@ -281,7 +281,7 @@ func (b *BlockServerRemote) OnLogin(
 
 // OnLogout implements the BlockServer interface for BlockServerRemote.
 func (b *BlockServerRemote) OnLogout(ctx context.Context) {
-	b.setUserInfo(nil)
+	b.setUserInfo(kbfscrypto.AuthUserInfo{})
 
 	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
 		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
