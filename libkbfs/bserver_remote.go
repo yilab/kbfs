@@ -6,6 +6,7 @@ package libkbfs
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -38,6 +39,9 @@ type BlockServerRemote struct {
 	log        logger.Logger
 	deferLog   logger.Logger
 	blkSrvAddr string
+
+	userInfoLock sync.RWMutex
+	userInfo     *kbfscrypto.AuthUserInfo
 
 	putAuthToken *kbfscrypto.AuthToken
 	getAuthToken *kbfscrypto.AuthToken
@@ -221,6 +225,24 @@ func newBlockServerRemoteWithClient(codec kbfscodec.Codec,
 func (b *BlockServerRemote) RemoteAddress() string {
 	return b.blkSrvAddr
 }
+func (b *BlockServerRemote) updateUserInfo(ctx context.Context) {
+	session, err := b.csg.GetCurrentSession(ctx)
+	if err != nil {
+		// TODO: Detect logout specifically.
+		b.userInfoLock.Lock()
+		defer b.userInfoLock.Unlock()
+		b.userInfo = nil
+		return
+	}
+
+	b.userInfoLock.Lock()
+	defer b.userInfoLock.Unlock()
+	b.userInfo = &kbfscrypto.AuthUserInfo{
+		Name:         session.Name,
+		UID:          session.UID,
+		VerifyingKey: session.VerifyingKey,
+	}
+}
 
 // resetAuth is called to reset the authorization on a BlockServer
 // connection.
@@ -232,10 +254,16 @@ func (b *BlockServerRemote) resetAuth(
 		b.log.Debug("BlockServerRemote: resetAuth called, err: %#v", err)
 	}()
 
-	session, err := b.csg.GetCurrentSession(ctx)
-	if err != nil {
+	b.updateUserInfo(ctx)
+
+	userInfo := func() *kbfscrypto.AuthUserInfo {
+		b.userInfoLock.RLock()
+		defer b.userInfoLock.RUnlock()
+		return b.userInfo
+	}()
+	if userInfo == nil {
 		b.log.Debug("BlockServerRemote: User logged out, skipping resetAuth")
-		return nil
+		return
 	}
 
 	// request a challenge
@@ -245,8 +273,7 @@ func (b *BlockServerRemote) resetAuth(
 	}
 
 	// get a new signature
-	signature, err := authToken.Sign(ctx, kbfscrypto.AuthUserInfo{
-		session.Name, session.UID, session.VerifyingKey}, challenge)
+	signature, err := authToken.Sign(ctx, *userInfo, challenge)
 	if err != nil {
 		return err
 	}
