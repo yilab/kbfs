@@ -77,10 +77,11 @@ var _ kbfscrypto.AuthTokenRefreshHandler = (*MDServerRemote)(nil)
 var _ rpc.ConnectionHandler = (*MDServerRemote)(nil)
 
 // NewMDServerRemote returns a new instance of MDServerRemote.
-func NewMDServerRemote(config Config, srvAddr string,
-	rpcLogFactory *libkb.RPCLogFactory) *MDServerRemote {
+func NewMDServerRemote(config Config, userInfo kbfscrypto.AuthUserInfo,
+	srvAddr string, rpcLogFactory *libkb.RPCLogFactory) *MDServerRemote {
 	mdServer := &MDServerRemote{
 		config:     config,
+		userInfo:   userInfo,
 		observers:  make(map[tlf.ID]chan<- error),
 		log:        config.MakeLogger(""),
 		mdSrvAddr:  srvAddr,
@@ -143,10 +144,7 @@ func (md *MDServerRemote) OnConnect(ctx context.Context,
 	// reset auth -- using md.client here would cause problematic recursion.
 	c := keybase1.MetadataClient{Cli: client}
 	pingIntervalSeconds, err := md.resetAuth(ctx, c)
-	switch err.(type) {
-	case nil:
-	case NoCurrentSessionError:
-	default:
+	if err != nil {
 		return err
 	}
 
@@ -251,16 +249,14 @@ func (b *MDServerRemote) OnLogout(ctx context.Context) {
 
 // RefreshAuthToken implements the AuthTokenRefreshHandler interface.
 func (md *MDServerRemote) RefreshAuthToken(ctx context.Context) {
-	md.log.Debug("MDServerRemote: Refreshing auth token...")
+	md.log.CDebugf(ctx, "MDServerRemote: Refreshing auth token...")
 
 	_, err := md.resetAuth(ctx, md.client)
 	switch err.(type) {
 	case nil:
-		md.log.Debug("MDServerRemote: auth token refreshed")
-	case NoCurrentSessionError:
-		md.log.Debug("MDServerRemote: no session available, connection remains anonymous")
+		md.log.CDebugf(ctx, "MDServerRemote: auth token refreshed")
 	default:
-		md.log.Debug("MDServerRemote: error refreshing auth token: %+v", err)
+		md.log.CDebugf(ctx, "MDServerRemote: error refreshing auth token: %+v", err)
 	}
 }
 

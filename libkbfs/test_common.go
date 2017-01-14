@@ -127,9 +127,10 @@ func MakeTestConfigOrBust(t logger.TestLogBackend,
 	default:
 		t.Fatal(err)
 	}
+	userInfo := session.ToAuthUserInfo()
 
-	blockServer := MakeTestBlockServerOrBust(t, config.Codec(),
-		config.Crypto(), session.ToAuthUserInfo(),
+	blockServer := MakeTestBlockServerOrBust(
+		t, config.Codec(), config.Crypto(), userInfo,
 		env.NewContext().NewRPCLogFactory(), log)
 	config.SetBlockServer(blockServer)
 
@@ -167,7 +168,7 @@ func MakeTestConfigOrBust(t logger.TestLogBackend,
 		libkb.G.ConfigureLogging()
 
 		// connect to server
-		mdServer = NewMDServerRemote(config, mdServerAddr, env.NewContext().NewRPCLogFactory())
+		mdServer = NewMDServerRemote(config, userInfo, mdServerAddr, env.NewContext().NewRPCLogFactory())
 		// for now the MD server acts as the key server in production
 		keyServer = mdServer.(*MDServerRemote)
 
@@ -260,7 +261,7 @@ func ConfigAsUser(config *ConfigLocal, loggedInUser libkb.NormalizedUsername) *C
 	var keyServer KeyServer
 	if s, ok := config.MDServer().(*MDServerRemote); ok {
 		// connect to server
-		mdServer = NewMDServerRemote(c, s.RemoteAddress(), env.NewContext().NewRPCLogFactory())
+		mdServer = NewMDServerRemote(c, s.getUserInfo(), s.RemoteAddress(), env.NewContext().NewRPCLogFactory())
 		// for now the MD server also acts as the key server.
 		keyServer = mdServer.(*MDServerRemote)
 	} else {
