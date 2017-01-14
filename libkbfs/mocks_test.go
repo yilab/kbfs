@@ -2827,12 +2827,20 @@ func (_m *MockMDServer) EXPECT() *_MockMDServerRecorder {
 	return _m.recorder
 }
 
-func (_m *MockMDServer) RefreshAuthToken(_param0 context.Context) {
-	_m.ctrl.Call(_m, "RefreshAuthToken", _param0)
+func (_m *MockMDServer) OnLogin(ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	_m.ctrl.Call(_m, "OnLogin", ctx, userInfo)
 }
 
-func (_mr *_MockMDServerRecorder) RefreshAuthToken(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "RefreshAuthToken", arg0)
+func (_mr *_MockMDServerRecorder) OnLogin(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "OnLogin", arg0, arg1)
+}
+
+func (_m *MockMDServer) OnLogout(ctx context.Context) {
+	_m.ctrl.Call(_m, "OnLogout", ctx)
+}
+
+func (_mr *_MockMDServerRecorder) OnLogout(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "OnLogout", arg0)
 }
 
 func (_m *MockMDServer) GetForHandle(ctx context.Context, handle tlf.Handle, mStatus MergeStatus) (tlf.ID, *RootMetadataSigned, error) {
@@ -3013,12 +3021,20 @@ func (_m *MockmdServerLocal) EXPECT() *_MockmdServerLocalRecorder {
 	return _m.recorder
 }
 
-func (_m *MockmdServerLocal) RefreshAuthToken(_param0 context.Context) {
-	_m.ctrl.Call(_m, "RefreshAuthToken", _param0)
+func (_m *MockmdServerLocal) OnLogin(ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	_m.ctrl.Call(_m, "OnLogin", ctx, userInfo)
 }
 
-func (_mr *_MockmdServerLocalRecorder) RefreshAuthToken(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "RefreshAuthToken", arg0)
+func (_mr *_MockmdServerLocalRecorder) OnLogin(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "OnLogin", arg0, arg1)
+}
+
+func (_m *MockmdServerLocal) OnLogout(ctx context.Context) {
+	_m.ctrl.Call(_m, "OnLogout", ctx)
+}
+
+func (_mr *_MockmdServerLocalRecorder) OnLogout(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "OnLogout", arg0)
 }
 
 func (_m *MockmdServerLocal) GetForHandle(ctx context.Context, handle tlf.Handle, mStatus MergeStatus) (tlf.ID, *RootMetadataSigned, error) {

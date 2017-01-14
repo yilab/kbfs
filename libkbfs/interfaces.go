@@ -1070,7 +1070,8 @@ type authTokenRefreshHandler interface {
 //
 // TODO: Add interface for searching by time
 type MDServer interface {
-	authTokenRefreshHandler
+	OnLogin(ctx context.Context, userInfo kbfscrypto.AuthUserInfo)
+	OnLogout(ctx context.Context)
 
 	// GetForHandle returns the current (signed/encrypted) metadata
 	// object corresponding to the given top-level folder's handle, if

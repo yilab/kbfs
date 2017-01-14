@@ -29,7 +29,7 @@ func serviceLoggedIn(ctx context.Context, config Config, name string,
 		}
 	}
 
-	config.MDServer().RefreshAuthToken(ctx)
+	config.MDServer().OnLogin(ctx, session.ToAuthUserInfo())
 	config.BlockServer().OnLogin(ctx, session.ToAuthUserInfo())
 	config.KBFSOps().RefreshCachedFavorites(ctx)
 	config.KBFSOps().PushStatusChange()
@@ -41,7 +41,7 @@ func serviceLoggedOut(ctx context.Context, config Config) {
 		jServer.shutdownExistingJournals(ctx)
 	}
 	config.ResetCaches()
-	config.MDServer().RefreshAuthToken(ctx)
+	config.MDServer().OnLogout(ctx)
 	config.BlockServer().OnLogout(ctx)
 	config.KBFSOps().RefreshCachedFavorites(ctx)
 	config.KBFSOps().PushStatusChange()
