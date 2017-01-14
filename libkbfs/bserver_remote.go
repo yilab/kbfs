@@ -63,7 +63,7 @@ type blockServerRemoteClientHandler struct {
 func (b *blockServerRemoteClientHandler) RefreshAuthToken(
 	ctx context.Context) {
 	if err := b.bs.resetAuth(ctx, b.client, b.authToken); err != nil {
-		b.bs.log.CDebugf(ctx, "error refreshing auth token: %v", err)
+		b.bs.log.CDebugf(ctx, "error refreshing auth token: %+v", err)
 	}
 }
 
@@ -239,10 +239,10 @@ func (b *BlockServerRemote) setUserInfo(
 	}()
 
 	if err := b.resetAuth(ctx, b.putClient, b.putAuthToken); err != nil {
-		b.log.CDebugf(ctx, "error refreshing put auth token: %v", err)
+		b.log.CDebugf(ctx, "error refreshing put auth token: %+v", err)
 	}
 	if err := b.resetAuth(ctx, b.getClient, b.getAuthToken); err != nil {
-		b.log.CDebugf(ctx, "error refreshing get auth token: %v", err)
+		b.log.CDebugf(ctx, "error refreshing get auth token: %+v", err)
 	}
 }
 
@@ -253,12 +253,14 @@ func (b *BlockServerRemote) resetAuth(
 	authToken *kbfscrypto.AuthToken) (err error) {
 
 	defer func() {
-		b.log.Debug("BlockServerRemote: resetAuth called, err: %#v", err)
+		b.log.CDebugf(ctx,
+			"BlockServerRemote: resetAuth called, err: %+v", err)
 	}()
 
 	userInfo := b.getUserInfo()
 	if userInfo == (kbfscrypto.AuthUserInfo{}) {
-		b.log.Debug("BlockServerRemote: User logged out, skipping resetAuth")
+		b.log.CDebugf(ctx,
+			"BlockServerRemote: User logged out, skipping resetAuth")
 		return
 	}
 
