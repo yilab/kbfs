@@ -245,8 +245,8 @@ func (b *BlockServerRemote) resetAuth(
 	}
 
 	// get a new signature
-	signature, err := authToken.Sign(ctx, session.Name,
-		session.UID, session.VerifyingKey, challenge)
+	signature, err := authToken.Sign(ctx, kbfscrypto.AuthUserInfo{
+		session.Name, session.UID, session.VerifyingKey}, challenge)
 	if err != nil {
 		return err
 	}

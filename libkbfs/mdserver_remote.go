@@ -180,8 +180,8 @@ func (md *MDServerRemote) resetAuth(ctx context.Context, c keybase1.MetadataClie
 	md.log.Debug("MDServerRemote: received challenge")
 
 	// get a new signature
-	signature, err := md.authToken.Sign(ctx, session.Name, session.UID,
-		session.VerifyingKey, challenge)
+	signature, err := md.authToken.Sign(ctx, kbfscrypto.AuthUserInfo{
+		session.Name, session.UID, session.VerifyingKey}, challenge)
 	if err != nil {
 		md.log.Warning("MDServerRemote: error signing authentication token: %v", err)
 		return 0, err
