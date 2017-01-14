@@ -61,6 +61,14 @@ type AuthUserInfo struct {
 	VerifyingKey VerifyingKey
 }
 
+func (userInfo AuthUserInfo) String() string {
+	if userInfo == (AuthUserInfo{}) {
+		return "AuthUserInfo{}"
+	}
+	return fmt.Sprintf("AuthUserInfo{Name: %s, UID: %s, VerifyingKey: %s}",
+		userInfo.Name, userInfo.UID, userInfo.VerifyingKey)
+}
+
 // Sign is called to create a new signed authentication token.
 func (a *AuthToken) sign(ctx context.Context, userInfo AuthUserInfo,
 	challengeInfo keybase1.ChallengeInfo) (string, error) {

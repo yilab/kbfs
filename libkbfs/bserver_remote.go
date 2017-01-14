@@ -231,6 +231,7 @@ func (b *BlockServerRemote) getUserInfo() kbfscrypto.AuthUserInfo {
 
 func (b *BlockServerRemote) setUserInfo(
 	ctx context.Context, userInfo kbfscrypto.AuthUserInfo) {
+	b.log.CDebugf(ctx, "Setting user info to %s", userInfo)
 	func() {
 		b.userInfoLock.Lock()
 		defer b.userInfoLock.Unlock()
