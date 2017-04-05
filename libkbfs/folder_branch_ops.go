@@ -3580,6 +3580,12 @@ func (fbo *folderBranchOps) Sync(ctx context.Context, file Node) (err error) {
 	return nil
 }
 
+// Sync implements the KBFSOps interface for KBFSOpsStandard
+func (fs *KBFSOpsStandard) SyncAll(
+	ctx context.Context, folderBranch FolderBranch) error {
+
+}
+
 func (fbo *folderBranchOps) FolderStatus(
 	ctx context.Context, folderBranch FolderBranch) (
 	fbs FolderBranchStatus, updateChan <-chan StatusUpdate, err error) {
