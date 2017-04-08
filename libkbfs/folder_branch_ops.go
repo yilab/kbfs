@@ -3443,12 +3443,13 @@ func (fbo *folderBranchOps) SetMtime(
 
 func (fbo *folderBranchOps) startSyncLocked(ctx context.Context,
 	lState *lockState, file path) (
-	stillDirty bool, cleanupFn func(err error), err error) {
+	doSync bool, bps *blockPutState, cleanupFn func(err error),
+	afterUpdateFn func() error, err error) {
 	fbo.mdWriterLock.AssertLocked(lState)
 
 	// if the cache for this file isn't dirty, we're done
 	if !fbo.blocks.IsDirty(lState, file) {
-		return false, nil, nil
+		return false, nil, nil, nil, nil
 	}
 
 	// Verify we have permission to write.  We do this after the dirty
@@ -3456,7 +3457,7 @@ func (fbo *folderBranchOps) startSyncLocked(ctx context.Context,
 	// would get an error.
 	md, err := fbo.getMDForWriteLocked(ctx, lState)
 	if err != nil {
-		return true, nil, err
+		return false, nil, nil, nil, err
 	}
 
 	// If the MD doesn't match the MD expected by the path, that
@@ -3481,12 +3482,12 @@ func (fbo *folderBranchOps) startSyncLocked(ctx context.Context,
 		// perfectly accurate (but at the same time, we'd then have to
 		// fix up the intentional panic in the background flusher to
 		// be more tolerant of long-lived dirty, removed files).
-		return true, nil, fbo.blocks.ClearCacheInfo(lState, file)
+		return false, nil, nil, nil, fbo.blocks.ClearCacheInfo(lState, file)
 	}
 
 	session, err := fbo.config.KBPKI().GetCurrentSession(ctx)
 	if err != nil {
-		return true, nil, err
+		return false, nil, nil, nil, err
 	}
 
 	if file.isValidForNotification() {
@@ -3503,9 +3504,23 @@ func (fbo *folderBranchOps) startSyncLocked(ctx context.Context,
 		fbo.blocks.CleanupSyncState(
 			ctx, lState, md.ReadOnly(), file, blocksToRemove, syncState, err)
 	}()
-	return true, cleanupFn, err
+	if err != nil {
+		return false, nil, cleanupFn, nil, err
 	}
 
+	// Call this under the same blockLock as when the pointers are
+	// updated, so there's never any point in time where a read or
+	// write might slip in after the pointers are updated, but before
+	// the deferred writes are re-applied.
+	afterUpdateFn := func() error {
+		stillDirty, err = fbo.blocks.FinishSyncLocked(
+			ctx, lState, file, newPath, md.ReadOnly(), syncState, fbo.fbm)
+		return err
+	}
+	return true, bps, cleanupFn, afterUpdateFn, nil
+}
+
+func leftOverCrap() {
 	newPath, _, newBps, err :=
 		fbo.syncBlockAndCheckEmbedLocked(
 			ctx, lState, md, fblock, *file.parentPath(),
@@ -3527,16 +3542,6 @@ func (fbo *folderBranchOps) startSyncLocked(ctx context.Context,
 		md.GetTlfHandle().GetCanonicalName(), *bps)
 	if err != nil {
 		return true, err
-	}
-
-	// Call this under the same blockLock as when the pointers are
-	// updated, so there's never any point in time where a read or
-	// write might slip in after the pointers are updated, but before
-	// the deferred writes are re-applied.
-	afterUpdateFn := func() error {
-		stillDirty, err = fbo.blocks.FinishSyncLocked(
-			ctx, lState, file, newPath, md.ReadOnly(), syncState, fbo.fbm)
-		return err
 	}
 
 	err = fbo.finalizeMDWriteLocked(ctx, lState, md, bps, NoExcl, afterUpdateFn)
